@@ -1,0 +1,5 @@
+interface Figura{
+int getArea();
+}
+
+
