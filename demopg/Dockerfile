@@ -1,6 +1,6 @@
 FROM maven:3.9-eclipse-temurin-22 AS build
 WORKDIR /app
-COPY . .
+COPY demopg/ .
 RUN mvn clean package -DskipTests
 
 FROM openjdk:22-rc-oracle
