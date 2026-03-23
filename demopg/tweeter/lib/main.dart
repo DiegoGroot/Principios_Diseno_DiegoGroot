@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:futter/material.dart';
 import 'services/tweet_service.dart';
 import 'models/tweet.dart';
 
@@ -12,12 +12,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Tweeter - Singleton Pattern',
+      title: 'Diego Groot - tweeter app',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Tweeter - REST API Integration'),
+      home: const MyHomePage(title: 'Diego Groot - Tweeter App'),
     );
   }
 }
@@ -35,6 +35,8 @@ class _MyHomePageState extends State<MyHomePage> {
   // Using the singleton instance
   late TweetService _tweetService;
   late Future<List<Tweet>> _tweetsFuture;
+  final TextEditingController _tweetController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -42,7 +44,8 @@ class _MyHomePageState extends State<MyHomePage> {
     // Get the singleton instance
     _tweetService = TweetService();
     _tweetsFuture = _tweetService.fetchTweets();
-  }
+    _loadTweets();
+}
 
   @override
   Widget build(BuildContext context) {

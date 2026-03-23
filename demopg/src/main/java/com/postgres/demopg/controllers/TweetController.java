@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
 
 import com.postgres.demopg.models.Tweet;
 import com.postgres.demopg.repository.TweetRepository;
@@ -20,7 +23,6 @@ import org.springframework.data.domain.Pageable;
 @CrossOrigin(origins ="*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/tweets")
-
 public class TweetController{
 
 @Autowired 
@@ -38,4 +40,10 @@ tweetRepository.save(myTweet);
 return myTweet;
 
 }
+
+@DeleteMapping("/{id}")
+public void deleteTweet(@PathVariable Long id){
+tweetRepository.deleteById(id);
+}
+
 }
