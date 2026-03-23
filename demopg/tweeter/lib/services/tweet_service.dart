@@ -2,12 +2,14 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/tweet.dart';
 import '../models/tweet_response.dart';
+import 'package:flutter/foundation.dart';
 
 class TweetService {
   static final TweetService _instance = TweetService._internal();
 
- final String baseUrl = 'https://tweeter-api-diegogroot.onrender.com/api';
-//final String baseUrl = 'http://localhost:8080/api';
+ final String baseUrl = kIsWeb
+   ? '/api'
+   : 'https://tweeter-api-diegogroot.onrender.com/api/tweets';
   late http.Client _httpClient;
 
   TweetService._internal() {
@@ -38,7 +40,7 @@ class TweetService {
         );
       }
     } catch (e) {
-      throw Exception('Error fetching tweet: $e');
+      print('ERROR: $e'); print('ERROR: $e'); throw Exception('Error fetching tweet: $e');
     }
   }
 
