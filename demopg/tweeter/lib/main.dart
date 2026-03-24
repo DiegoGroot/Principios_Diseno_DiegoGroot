@@ -1,4 +1,4 @@
-import 'package:futter/material.dart';
+import 'package:flutter/material.dart';
 import 'services/tweet_service.dart';
 import 'models/tweet.dart';
 
@@ -12,7 +12,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Diego Groot - tweeter app',
+      // ── Tu título y tema indigo ────────────────────────────────────────
+      title: 'Diego Groot - Tweeter App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
@@ -24,7 +25,6 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
   final String title;
 
   @override
@@ -32,7 +32,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  // Using the singleton instance
   late TweetService _tweetService;
   late Future<List<Tweet>> _tweetsFuture;
   final TextEditingController _tweetController = TextEditingController();
@@ -41,11 +40,114 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    // Get the singleton instance
     _tweetService = TweetService();
-    _tweetsFuture = _tweetService.fetchTweets();
     _loadTweets();
-}
+  }
+
+  // ── Carga tweets ─────────────────────────────────────────────────────────
+  void _loadTweets() {
+    setState(() {
+      _tweetsFuture = _tweetService.fetchTweets();
+    });
+  }
+
+  // ── Crear tweet ──────────────────────────────────────────────────────────
+  Future<void> _createTweet() async {
+    final content = _tweetController.text.trim();
+    if (content.isEmpty) {
+      _showErrorDialog('Tweet content cannot be empty');
+      return;
+    }
+    setState(() => _isLoading = true);
+    try {
+      await _tweetService.createTweet(content);
+      _tweetController.clear();
+      _loadTweets();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Tweet created successfully!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      _showErrorDialog('Error creating tweet: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  // ── Eliminar tweet ───────────────────────────────────────────────────────
+  Future<void> _deleteTweet(int id) async {
+    setState(() => _isLoading = true);
+    try {
+      await _tweetService.deleteTweet(id);
+      _loadTweets();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Tweet deleted successfully!'),
+            backgroundColor: Colors.blue,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      _showErrorDialog('Error deleting tweet: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  // ── Dialog confirmación delete ───────────────────────────────────────────
+  void _showDeleteConfirmation(int id) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Delete Tweet?'),
+        content: const Text('Are you sure you want to delete this tweet?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _deleteTweet(id);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Dialog error ─────────────────────────────────────────────────────────
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _tweetController.dispose();
+    _tweetService.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,84 +157,130 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
         elevation: 2,
       ),
-      body: FutureBuilder<List<Tweet>>(
-        future: _tweetsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    color: Colors.red,
-                    size: 64,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Error: ${snapshot.error}',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _tweetsFuture = _tweetService.fetchTweets();
-                      });
-                    },
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            );
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
-              child: Text('No tweets available'),
-            );
-          } else {
-            final tweets = snapshot.data!;
-            return ListView.builder(
-              itemCount: tweets.length,
-              itemBuilder: (context, index) {
-                final tweet = tweets[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
+      body: Column(
+        children: [
+          _buildCreateTweetSection(),
+          Expanded(
+            child: FutureBuilder<List<Tweet>>(
+              future: _tweetsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        const Icon(Icons.error_outline,
+                            color: Colors.red, size: 64),
+                        const SizedBox(height: 16),
                         Text(
-                          tweet.tweet,
-                          style: Theme.of(context).textTheme.bodyLarge,
+                          'Error: ${snapshot.error}',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.red),
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'ID: ${tweet.id}',
-                          style: Theme.of(context).textTheme.labelSmall,
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: _loadTweets,
+                          child: const Text('Retry'),
                         ),
                       ],
                     ),
-                  ),
-                );
+                  );
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('No tweets available'));
+                } else {
+                  return ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) =>
+                        _buildTweetCard(snapshot.data![index]),
+                  );
+                }
               },
-            );
-          }
-        },
+            ),
+          ),
+        ],
       ),
+      // ── Tu FAB de refresh ────────────────────────────────────────────────
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _tweetsFuture = _tweetService.fetchTweets();
-          });
-        },
+        onPressed: _loadTweets,
         tooltip: 'Refresh',
         child: const Icon(Icons.refresh),
+      ),
+    );
+  }
+
+  Widget _buildCreateTweetSection() {
+    return Container(
+      color: Colors.grey[100],
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          TextField(
+            controller: _tweetController,
+            maxLines: 3,
+            decoration: InputDecoration(
+              hintText: "What's on your mind?",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              fillColor: Colors.white,
+              filled: true,
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _createTweet,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+              child: _isLoading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Post Tweet'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTweetCard(Tweet tweet) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    tweet.tweet,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => _showDeleteConfirmation(tweet.id),
+                  tooltip: 'Delete tweet',
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'ID: ${tweet.id}',
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+          ],
+        ),
       ),
     );
   }
