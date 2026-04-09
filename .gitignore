@@ -1,0 +1,20 @@
+# Java y Maven
+target/
+*.class
+*.jar
+*.war
+
+# Temporales de editores
+*.save
+*.swp
+.DS_Store
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+
+# Flutter
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
