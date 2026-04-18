@@ -1,6 +1,4 @@
 package com.postgres.demopg.controllers;
-import java.util.Optional;
-
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;

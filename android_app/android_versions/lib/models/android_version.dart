@@ -1,7 +1,7 @@
 // lib/models/android_version.dart
 
 class AndroidVersion {
-  final int id;
+  final int? id;
   final String nombre;
   final String fecha;
   final String descripcion;
@@ -9,7 +9,7 @@ class AndroidVersion {
   final String urlPhoto;
 
   AndroidVersion({
-    required this.id,
+    this.id,
     required this.nombre,
     required this.fecha,
     required this.descripcion,
@@ -19,8 +19,9 @@ class AndroidVersion {
 
   /// Convert JSON to AndroidVersion object
   factory AndroidVersion.fromJson(Map<String, dynamic> json) {
+    final id = json['id'] as int?;
     return AndroidVersion(
-      id:              json['id']              ?? 0,
+      id:              (id == null || id <= 0) ? null : id,
       nombre:          json['nombre']          ?? '',
       fecha:           json['fecha']           ?? '',
       descripcion:     json['descripcion']     ?? '',
@@ -31,14 +32,18 @@ class AndroidVersion {
 
   /// Convert AndroidVersion object to JSON
   Map<String, dynamic> toJson() {
-    return {
-      'id':              id,
+    final data = <String, dynamic>{
       'nombre':          nombre,
       'fecha':           fecha,
       'descripcion':     descripcion,
       'caracteristicas': caracteristicas,
       'urlPhoto':        urlPhoto,
     };
+    // Solo incluir el id si no es null y es válido
+    if (id != null && id! > 0) {
+      data['id'] = id!;
+    }
+    return data;
   }
 
   /// Lista de características separadas por coma

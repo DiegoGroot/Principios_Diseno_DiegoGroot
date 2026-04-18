@@ -2,12 +2,15 @@
 
 import 'package:flutter/material.dart';
 import '../models/android_version.dart';
+import '../models/user.dart';
 import '../services/android_service.dart';
 import 'detail_screen.dart';
 import 'create_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final User currentUser;
+  const HomeScreen({super.key, required this.currentUser});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -52,12 +55,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Color(0xFF3DDC84), size: 22),
             ),
             const SizedBox(width: 10),
-            const Text(
-              'Android Versions',
-              style: TextStyle(
-                color: Color(0xFF3DDC84),
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'android-versions',
+                    style: TextStyle(
+                      color: Color(0xFF3DDC84),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    widget.currentUser.nombre,
+                    style: const TextStyle(
+                      color: Color(0xFF6272A4),
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -66,6 +83,17 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.refresh, color: Color(0xFF6272A4)),
             onPressed: _load,
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings, color: Color(0xFF3DDC84)),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProfileScreen(user: widget.currentUser),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -283,7 +311,9 @@ class _VersionCard extends StatelessWidget {
                             ],
                           ),
                         );
-                        if (ok == true) await onDelete(version.id);
+                        if (ok == true && version.id != null) {
+                          await onDelete(version.id!);
+                        }
                       },
                     ),
                   ),

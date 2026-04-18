@@ -1,4 +1,4 @@
-package com.postgres.demopg;
+package com.postgres.android_proyect;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

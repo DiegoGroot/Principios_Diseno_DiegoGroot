@@ -26,7 +26,6 @@ class _CreateScreenState extends State<CreateScreen> {
 
     try {
       final nueva = AndroidVersion(
-        id:              0,
         nombre:          _nombreCtrl.text.trim(),
         fecha:           _fechaCtrl.text.trim(),
         descripcion:     _descripcionCtrl.text.trim(),
