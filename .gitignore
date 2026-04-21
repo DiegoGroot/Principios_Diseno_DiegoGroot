@@ -18,3 +18,4 @@ target/
 build/
 .flutter-plugins
 .flutter-plugins-dependencies
+android_app/src/main/resources/application.properties
