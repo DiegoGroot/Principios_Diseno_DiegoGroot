@@ -1,5 +1,3 @@
-// lib/screens/home_screen.dart
-
 import 'package:flutter/material.dart';
 import '../models/android_version.dart';
 import '../models/user.dart';
@@ -27,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _load() {
     setState(() {
-      _future = AndroidService.getAll();
+      _future = AndroidService.getAll(widget.currentUser.id);
     });
   }
 
@@ -51,29 +49,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: const Color(0xFF3DDC84).withOpacity(0.12),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.android,
-                  color: Color(0xFF3DDC84), size: 22),
+              child: const Icon(Icons.android, color: Color(0xFF3DDC84), size: 22),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'android-versions',
-                    style: TextStyle(
-                      color: Color(0xFF3DDC84),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  Text(
-                    widget.currentUser.nombre,
-                    style: const TextStyle(
-                      color: Color(0xFF6272A4),
-                      fontSize: 11,
-                    ),
-                  ),
+                  const Text('android-versions',
+                      style: TextStyle(
+                          color: Color(0xFF3DDC84),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16)),
+                  Text(widget.currentUser.nombre,
+                      style: const TextStyle(
+                          color: Color(0xFF6272A4), fontSize: 11)),
                 ],
               ),
             ),
@@ -86,13 +76,14 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.settings, color: Color(0xFF3DDC84)),
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+              final updated = await Navigator.push<User>(
                 context,
                 MaterialPageRoute(
                   builder: (_) => ProfileScreen(user: widget.currentUser),
                 ),
               );
+              if (updated != null) _load();
             },
           ),
         ],
@@ -101,9 +92,12 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: const Color(0xFF3DDC84),
         foregroundColor: const Color(0xFF0F0F1A),
         onPressed: () async {
-          final created =
-              await Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const CreateScreen()));
+          final created = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CreateScreen(userId: widget.currentUser.id),
+            ),
+          );
           if (created == true) _load();
         },
         child: const Icon(Icons.add),
@@ -113,8 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(color: Color(0xFF3DDC84)),
-            );
+                child: CircularProgressIndicator(color: Color(0xFF3DDC84)));
           }
           if (snapshot.hasError) {
             return Center(
@@ -129,8 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 16),
                   TextButton.icon(
                     onPressed: _load,
-                    icon: const Icon(Icons.refresh,
-                        color: Color(0xFF3DDC84)),
+                    icon: const Icon(Icons.refresh, color: Color(0xFF3DDC84)),
                     label: const Text('Reintentar',
                         style: TextStyle(color: Color(0xFF3DDC84))),
                   ),
@@ -159,11 +151,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// ── Tarjeta individual ───────────────────────────────────────────
 class _VersionCard extends StatelessWidget {
   final AndroidVersion version;
   final Future<void> Function(int) onDelete;
-
   const _VersionCard({required this.version, required this.onDelete});
 
   @override
@@ -183,38 +173,30 @@ class _VersionCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Imagen ───────────────────────────────────────────
             ClipRRect(
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(16)),
               child: version.urlPhoto.isNotEmpty
-                  ? Image.network(
-                      version.urlPhoto,
+                  ? Image.network(version.urlPhoto,
                       height: 140,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _placeholder(),
-                    )
+                      errorBuilder: (_, __, ___) => _placeholder())
                   : _placeholder(),
             ),
-
             Padding(
               padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ── Nombre + ID ───────────────────────────────
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          version.nombre,
-                          style: const TextStyle(
-                            color: Color(0xFF3DDC84),
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        child: Text(version.nombre,
+                            style: const TextStyle(
+                                color: Color(0xFF3DDC84),
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold)),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -223,38 +205,27 @@ class _VersionCard extends StatelessWidget {
                           color: const Color(0xFF3DDC84).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                              color:
-                                  const Color(0xFF3DDC84).withOpacity(0.25)),
+                              color: const Color(0xFF3DDC84).withOpacity(0.25)),
                         ),
-                        child: Text(
-                          'ID ${version.id}',
-                          style: const TextStyle(
-                              color: Color(0xFF3DDC84), fontSize: 11),
-                        ),
+                        child: Text('ID ${version.id}',
+                            style: const TextStyle(
+                                color: Color(0xFF3DDC84), fontSize: 11)),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
-
-                  // ── Fecha ─────────────────────────────────────
-                  Text(
-                    version.fecha,
-                    style: const TextStyle(
-                        color: Color(0xFF6272A4), fontSize: 12),
-                  ),
+                  Text(version.fecha,
+                      style: const TextStyle(
+                          color: Color(0xFF6272A4), fontSize: 12)),
                   const SizedBox(height: 8),
-
-                  // ── Descripción ───────────────────────────────
-                  Text(
-                    version.descripcion,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        color: Color(0xFFAAAAAA), fontSize: 13, height: 1.5),
-                  ),
+                  Text(version.descripcion,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          color: Color(0xFFAAAAAA),
+                          fontSize: 13,
+                          height: 1.5)),
                   const SizedBox(height: 10),
-
-                  // ── Tags características ──────────────────────
                   Wrap(
                     spacing: 6,
                     runSpacing: 6,
@@ -266,19 +237,15 @@ class _VersionCard extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: const Color(0xFF242435),
                                 borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                    color: const Color(0xFF3D3D5C)),
+                                border:
+                                    Border.all(color: const Color(0xFF3D3D5C)),
                               ),
-                              child: Text(
-                                c,
-                                style: const TextStyle(
-                                    color: Color(0xFF8888AA), fontSize: 11),
-                              ),
+                              child: Text(c,
+                                  style: const TextStyle(
+                                      color: Color(0xFF8888AA), fontSize: 11)),
                             ))
                         .toList(),
                   ),
-
-                  // ── Botón delete ──────────────────────────────
                   Align(
                     alignment: Alignment.centerRight,
                     child: IconButton(
@@ -291,8 +258,7 @@ class _VersionCard extends StatelessWidget {
                             backgroundColor: const Color(0xFF1A0A2E),
                             title: const Text('Eliminar',
                                 style: TextStyle(color: Colors.white)),
-                            content: Text(
-                                '¿Eliminar "${version.nombre}"?',
+                            content: Text('¿Eliminar "${version.nombre}"?',
                                 style: const TextStyle(
                                     color: Color(0xFF6272A4))),
                             actions: [
@@ -326,14 +292,11 @@ class _VersionCard extends StatelessWidget {
     );
   }
 
-  Widget _placeholder() {
-    return Container(
-      height: 140,
-      width: double.infinity,
-      color: const Color(0xFF13091F),
-      child: const Center(
-        child: Icon(Icons.android, color: Color(0xFF3DDC84), size: 50),
-      ),
-    );
-  }
+  Widget _placeholder() => Container(
+        height: 140,
+        width: double.infinity,
+        color: const Color(0xFF13091F),
+        child: const Center(
+            child: Icon(Icons.android, color: Color(0xFF3DDC84), size: 50)),
+      );
 }

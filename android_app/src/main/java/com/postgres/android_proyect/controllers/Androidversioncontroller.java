@@ -1,21 +1,18 @@
 package com.postgres.android_proyect.controllers;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.postgres.android_proyect.models.android_tweet;
 import com.postgres.android_proyect.models.CreateAndroidVersionRequest;
+import com.postgres.android_proyect.models.User;
 import com.postgres.android_proyect.repository.AndroidRepository;
+import com.postgres.android_proyect.repository.UserRepository;
 
 import jakarta.validation.Valid;
 
@@ -27,15 +24,27 @@ public class Androidversioncontroller {
     @Autowired
     private AndroidRepository androidVersionRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    // GET todas las versiones de un usuario
     @GetMapping
-    public List<android_tweet> getAll() {
-        return androidVersionRepository.findAll();
+    public List<android_tweet> getAll(@RequestParam Long userId) {
+        return androidVersionRepository.findByUserId(userId);
     }
 
+    // POST crear versión para un usuario
     @PostMapping
     @Transactional
-    public android_tweet create(@Valid @RequestBody CreateAndroidVersionRequest request) {
-        // Crear nueva entidad sin ID (será generado por la BD)
+    public ResponseEntity<?> create(
+            @RequestParam Long userId,
+            @Valid @RequestBody CreateAndroidVersionRequest request) {
+
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().body("Usuario no encontrado");
+        }
+
         android_tweet version = new android_tweet(
             request.getNombre(),
             request.getFecha(),
@@ -43,11 +52,17 @@ public class Androidversioncontroller {
             request.getCaracteristicas(),
             request.getUrlPhoto()
         );
-        return androidVersionRepository.save(version);
+        version.setUser(user.get());
+        return ResponseEntity.ok(androidVersionRepository.save(version));
     }
 
+    // DELETE versión por ID
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        if (!androidVersionRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
         androidVersionRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -3,59 +3,67 @@ package com.postgres.android_proyect.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@Table( name = "android_versions")
-public class android_tweet{
+@Table(name = "android_versions")
+public class android_tweet {
 
-@Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
-private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-@NotBlank
-@Size(max = 100)
-private String nombre;
+    @NotBlank
+    @Size(max = 100)
+    private String nombre;
 
-@NotBlank
-private String fecha;
+    @NotBlank
+    private String fecha;
 
-@NotBlank
-@Size(max = 500)
-private String descripcion;
+    @NotBlank
+    @Size(max = 500)
+    private String descripcion;
 
-@Column(length = 1000)
-private String caracteristicas;
+    @Column(length = 1000)
+    private String caracteristicas;
 
-@Column(name = "url_photo")
-private String urlPhoto;
+    @Column(name = "url_photo")
+    private String urlPhoto;
 
-public android_tweet(){ }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private User user;
 
-public android_tweet(String nombre, String fecha, String descripcion,
-             String caracteristicas, String urlPhoto){
-    this.nombre          = nombre;
-    this.fecha           = fecha;
-    this.descripcion     = descripcion;
-    this.caracteristicas = caracteristicas;
-    this.urlPhoto        = urlPhoto;
-}
+    public android_tweet() {}
 
-public Long getId(){ return id; }
-public void setId(Long id){ this.id = id; }
+    public android_tweet(String nombre, String fecha, String descripcion,
+                         String caracteristicas, String urlPhoto) {
+        this.nombre = nombre;
+        this.fecha = fecha;
+        this.descripcion = descripcion;
+        this.caracteristicas = caracteristicas;
+        this.urlPhoto = urlPhoto;
+    }
 
-public String getNombre(){ return nombre; }
-public void setNombre(String nombre){ this.nombre = nombre; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-public String getFecha(){ return fecha; }
-public void setFecha(String fecha){ this.fecha = fecha; }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
-public String getDescripcion(){ return descripcion; }
-public void setDescripcion(String descripcion){ this.descripcion = descripcion; }
+    public String getFecha() { return fecha; }
+    public void setFecha(String fecha) { this.fecha = fecha; }
 
-public String getCaracteristicas(){ return caracteristicas; }
-public void setCaracteristicas(String caracteristicas){ this.caracteristicas = caracteristicas; }
+    public String getDescripcion() { return descripcion; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
 
-public String getUrlPhoto(){ return urlPhoto; }
-public void setUrlPhoto(String urlPhoto){ this.urlPhoto = urlPhoto; }
+    public String getCaracteristicas() { return caracteristicas; }
+    public void setCaracteristicas(String caracteristicas) { this.caracteristicas = caracteristicas; }
 
+    public String getUrlPhoto() { return urlPhoto; }
+    public void setUrlPhoto(String urlPhoto) { this.urlPhoto = urlPhoto; }
+
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 }

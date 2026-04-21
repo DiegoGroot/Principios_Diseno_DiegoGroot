@@ -1,11 +1,10 @@
-// lib/screens/create_screen.dart
-
 import 'package:flutter/material.dart';
 import '../models/android_version.dart';
 import '../services/android_service.dart';
 
 class CreateScreen extends StatefulWidget {
-  const CreateScreen({super.key});
+  final int userId;
+  const CreateScreen({super.key, required this.userId});
 
   @override
   State<CreateScreen> createState() => _CreateScreenState();
@@ -32,7 +31,7 @@ class _CreateScreenState extends State<CreateScreen> {
         caracteristicas: _caracteristicasCtrl.text.trim(),
         urlPhoto:        _urlPhotoCtrl.text.trim(),
       );
-      await AndroidService.create(nueva);
+      await AndroidService.create(nueva, widget.userId);
       if (mounted) {
         Navigator.pop(context, true);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -44,8 +43,7 @@ class _CreateScreenState extends State<CreateScreen> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e'),
-            backgroundColor: Colors.redAccent),
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.redAccent),
       );
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -84,10 +82,11 @@ class _CreateScreenState extends State<CreateScreen> {
             children: [
               _field(_nombreCtrl, 'Nombre', 'Android 15', Icons.android),
               _field(_fechaCtrl, 'Fecha', '3 Octubre 2024', Icons.calendar_today),
-              _field(_descripcionCtrl, 'Descripción', 'Descripción de la versión...',
-                  Icons.description, maxLines: 3),
+              _field(_descripcionCtrl, 'Descripción',
+                  'Descripción de la versión...', Icons.description,
+                  maxLines: 3),
               _field(_caracteristicasCtrl, 'Características',
-                  'Feature 1, Feature 2, Feature 3', Icons.list),
+                  'Feature 1, Feature 2', Icons.list),
               _field(_urlPhotoCtrl, 'URL de imagen (opcional)', 'https://...',
                   Icons.image, required: false),
               const SizedBox(height: 28),
@@ -103,7 +102,8 @@ class _CreateScreenState extends State<CreateScreen> {
                         borderRadius: BorderRadius.circular(12)),
                   ),
                   child: _loading
-                      ? const CircularProgressIndicator(color: Color(0xFF0F0F1A))
+                      ? const CircularProgressIndicator(
+                          color: Color(0xFF0F0F1A))
                       : const Text('Crear versión',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16)),
@@ -116,14 +116,9 @@ class _CreateScreenState extends State<CreateScreen> {
     );
   }
 
-  Widget _field(
-    TextEditingController ctrl,
-    String label,
-    String hint,
-    IconData icon, {
-    int maxLines = 1,
-    bool required = true,
-  }) {
+  Widget _field(TextEditingController ctrl, String label, String hint,
+      IconData icon,
+      {int maxLines = 1, bool required = true}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
@@ -148,11 +143,13 @@ class _CreateScreenState extends State<CreateScreen> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF3DDC84), width: 1.5),
+            borderSide:
+                const BorderSide(color: Color(0xFF3DDC84), width: 1.5),
           ),
         ),
         validator: required
-            ? (v) => (v == null || v.trim().isEmpty) ? 'Campo requerido' : null
+            ? (v) =>
+                (v == null || v.trim().isEmpty) ? 'Campo requerido' : null
             : null,
       ),
     );

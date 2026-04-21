@@ -12,31 +12,45 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nombreCtrl = TextEditingController(text: 'Diego Groot');
-  final _correoCtrl = TextEditingController(text: 'diego@ejemplo.com');
-  final _contrasenaCtrl = TextEditingController(text: 'Password123');
+  final _nombreCtrl = TextEditingController();
+  final _correoCtrl = TextEditingController();
+  final _contrasenaCtrl = TextEditingController();
   bool _loading = false;
   bool _obscurePassword = true;
+  bool _isLoginMode = true; // true = login, false = registro
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
 
-    final currentUser = User(
-      nombre: _nombreCtrl.text.trim(),
-      correo: _correoCtrl.text.trim(),
-      contrasena: _contrasenaCtrl.text.trim(),
-    );
+    try {
+      User user;
+      if (_isLoginMode) {
+        user = await UserService.login(
+          _correoCtrl.text.trim(),
+          _contrasenaCtrl.text.trim(),
+        );
+      } else {
+        user = await UserService.register(
+          _nombreCtrl.text.trim(),
+          _correoCtrl.text.trim(),
+          _contrasenaCtrl.text.trim(),
+        );
+      }
 
-    await UserService.saveUser(currentUser);
-
-    if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => HomeScreen(currentUser: currentUser),
-      ),
-    );
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => HomeScreen(currentUser: user)),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$e'), backgroundColor: Colors.redAccent),
+      );
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   @override
@@ -61,27 +75,30 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 32),
                 const Icon(Icons.favorite, size: 72, color: Color(0xFF3DDC84)),
                 const SizedBox(height: 22),
-                const Text(
-                  'android-versions login',
+                Text(
+                  _isLoginMode ? 'Iniciar sesión' : 'Crear cuenta',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Color(0xFFFFFFFF),
+                  style: const TextStyle(
+                    color: Colors.white,
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Registra tu usuario para acceder',
+                Text(
+                  _isLoginMode
+                      ? 'Ingresa tu correo y contraseña'
+                      : 'Registra tu usuario para acceder',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Color(0xFF6272A4), fontSize: 14),
+                  style: const TextStyle(color: Color(0xFF6272A4), fontSize: 14),
                 ),
                 const SizedBox(height: 32),
                 Form(
                   key: _formKey,
                   child: Column(
                     children: [
-                      _field(_nombreCtrl, 'Nombre', 'Diego Groot', Icons.person),
+                      if (!_isLoginMode)
+                        _field(_nombreCtrl, 'Nombre', 'Diego Groot', Icons.person),
                       _field(_correoCtrl, 'Correo', 'diego@ejemplo.com', Icons.email),
                       _passwordField(),
                     ],
@@ -100,14 +117,26 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: _loading
                       ? const CircularProgressIndicator(color: Color(0xFF0F0F1A))
-                      : const Text('Guardar usuario',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      : Text(
+                          _isLoginMode ? 'Iniciar sesión' : 'Registrarse',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Usuario predefinido: diego@ejemplo.com / Password123',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Color(0xFF6272A4), fontSize: 12),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _isLoginMode = !_isLoginMode;
+                      _formKey.currentState?.reset();
+                    });
+                  },
+                  child: Text(
+                    _isLoginMode
+                        ? '¿No tienes cuenta? Regístrate'
+                        : '¿Ya tienes cuenta? Inicia sesión',
+                    style: const TextStyle(color: Color(0xFF3DDC84)),
+                  ),
                 ),
               ],
             ),
@@ -117,7 +146,8 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _field(TextEditingController controller, String label, String hint, IconData icon) {
+  Widget _field(TextEditingController controller, String label, String hint,
+      IconData icon) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 18),
       child: TextFormField(
@@ -144,12 +174,8 @@ class _LoginScreenState extends State<LoginScreen> {
             borderSide: const BorderSide(color: Color(0xFF3DDC84), width: 1.5),
           ),
         ),
-        validator: (value) {
-          if (value == null || value.trim().isEmpty) {
-            return 'Campo requerido';
-          }
-          return null;
-        },
+        validator: (v) =>
+            (v == null || v.trim().isEmpty) ? 'Campo requerido' : null,
       ),
     );
   }
@@ -172,9 +198,8 @@ class _LoginScreenState extends State<LoginScreen> {
               _obscurePassword ? Icons.visibility_off : Icons.visibility,
               color: const Color(0xFF6272A4),
             ),
-            onPressed: () {
-              setState(() => _obscurePassword = !_obscurePassword);
-            },
+            onPressed: () =>
+                setState(() => _obscurePassword = !_obscurePassword),
           ),
           filled: true,
           fillColor: const Color(0xFF1A0A2E),
@@ -191,13 +216,9 @@ class _LoginScreenState extends State<LoginScreen> {
             borderSide: const BorderSide(color: Color(0xFF3DDC84), width: 1.5),
           ),
         ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Contraseña requerida';
-          }
-          if (value.length < 6) {
-            return 'Mínimo 6 caracteres';
-          }
+        validator: (v) {
+          if (v == null || v.isEmpty) return 'Contraseña requerida';
+          if (v.length < 6) return 'Mínimo 6 caracteres';
           return null;
         },
       ),
