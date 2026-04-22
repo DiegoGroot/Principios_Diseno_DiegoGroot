@@ -3,9 +3,8 @@ import 'package:http/http.dart' as http;
 import '../models/android_version.dart';
 
 class AndroidService {
-  static const String baseUrl = 'https://android-versions.onrender.com/api/android-versions';
+  static const String baseUrl = 'http://localhost:8080/api/android-versions';
 
-  /// Obtener versiones del usuario
   static Future<List<AndroidVersion>> getAll(int userId) async {
     final response = await http.get(Uri.parse('$baseUrl?userId=$userId'));
     if (response.statusCode == 200) {
@@ -16,7 +15,6 @@ class AndroidService {
     }
   }
 
-  /// Crear versión para el usuario
   static Future<AndroidVersion> create(AndroidVersion version, int userId) async {
     final response = await http.post(
       Uri.parse('$baseUrl?userId=$userId'),
@@ -36,11 +34,7 @@ class AndroidService {
     }
   }
 
-  /// Eliminar versión
   static Future<void> delete(int id) async {
-    final response = await http.delete(Uri.parse('$baseUrl/$id'));
-    if (response.statusCode != 204) {
-      throw Exception('Error al eliminar versión');
-    }
+    await http.delete(Uri.parse('$baseUrl/$id'));
   }
 }

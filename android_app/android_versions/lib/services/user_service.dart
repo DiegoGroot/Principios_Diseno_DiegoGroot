@@ -5,9 +5,7 @@ import '../models/user.dart';
 
 class UserService {
   static const _storageKey = 'current_user';
-  static const String baseUrl = 'https://android-versions.onrender.com/api/users';
-
-  // ── LOCAL STORAGE ──────────────────────────────────────────────
+  static const String baseUrl = 'http://localhost:8080/api/users';
 
   static Future<User?> loadUser() async {
     final prefs = await SharedPreferences.getInstance();
@@ -26,20 +24,12 @@ class UserService {
     await prefs.remove(_storageKey);
   }
 
-  // ── API CALLS ──────────────────────────────────────────────────
-
-  /// Registrar nuevo usuario
   static Future<User> register(String nombre, String correo, String contrasena) async {
     final response = await http.post(
       Uri.parse(baseUrl),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'nombre': nombre,
-        'correo': correo,
-        'contrasena': contrasena,
-      }),
+      body: jsonEncode({'nombre': nombre, 'correo': correo, 'contrasena': contrasena}),
     );
-
     if (response.statusCode == 201) {
       final user = User.fromJson(jsonDecode(response.body));
       await saveUserLocal(user);
@@ -51,40 +41,27 @@ class UserService {
     }
   }
 
-  /// Login con correo y contraseña
   static Future<User> login(String correo, String contrasena) async {
     final response = await http.post(
       Uri.parse('$baseUrl/login'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'correo': correo,
-        'contrasena': contrasena,
-      }),
+      body: jsonEncode({'correo': correo, 'contrasena': contrasena}),
     );
-
     if (response.statusCode == 200) {
       final user = User.fromJson(jsonDecode(response.body));
       await saveUserLocal(user);
       return user;
-    } else if (response.statusCode == 401) {
-      throw Exception('Correo o contraseña incorrectos');
     } else {
-      throw Exception('Error al iniciar sesión');
+      throw Exception('Correo o contraseña incorrectos');
     }
   }
 
-  /// Actualizar datos del usuario
   static Future<User> update(User user) async {
     final response = await http.put(
       Uri.parse('$baseUrl/${user.id}'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'nombre': user.nombre,
-        'correo': user.correo,
-        'contrasena': user.contrasena,
-      }),
+      body: jsonEncode({'nombre': user.nombre, 'correo': user.correo, 'contrasena': user.contrasena}),
     );
-
     if (response.statusCode == 200) {
       final updated = User.fromJson(jsonDecode(response.body));
       await saveUserLocal(updated);
@@ -94,7 +71,6 @@ class UserService {
     }
   }
 
-  /// Eliminar cuenta del usuario
   static Future<void> deleteAccount(int id) async {
     final response = await http.delete(Uri.parse('$baseUrl/$id'));
     if (response.statusCode == 204) {
