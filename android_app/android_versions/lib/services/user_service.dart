@@ -5,7 +5,7 @@ import '../models/user.dart';
 
 class UserService {
   static const _storageKey = 'current_user';
-  static const String baseUrl = 'http://localhost:8080/api/users';
+  static const String baseUrl = 'https://android-versions.onrender.com/api/users';
 
   static Future<User?> loadUser() async {
     final prefs = await SharedPreferences.getInstance();
