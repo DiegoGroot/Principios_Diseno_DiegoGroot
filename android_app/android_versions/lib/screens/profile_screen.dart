@@ -13,6 +13,8 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   late User _user;
+  bool _showPassword = false;
+  bool _showConfirmPassword = false;
 
   @override
   void initState() {
@@ -25,49 +27,64 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final nombreCtrl = TextEditingController(text: _user.nombre);
     final correoCtrl = TextEditingController(text: _user.correo);
     final contraCtrl = TextEditingController(text: _user.contrasena);
+    final contraConfirmCtrl = TextEditingController(text: _user.contrasena);
     final formKey = GlobalKey<FormState>();
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1A0A2E),
-        title: const Text('Editar cuenta',
-            style: TextStyle(color: Color(0xFF3DDC84))),
-        content: Form(
-          key: formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _dialogField(nombreCtrl, 'Nombre', Icons.person),
-                const SizedBox(height: 12),
-                _dialogField(correoCtrl, 'Correo', Icons.email),
-                const SizedBox(height: 12),
-                _dialogField(contraCtrl, 'Contraseña', Icons.lock,
-                    obscure: true),
-              ],
+      builder: (_) => StatefulBuilder(
+        builder: (context, setStateDialog) => AlertDialog(
+          backgroundColor: const Color(0xFF1A0A2E),
+          title: const Text('Editar cuenta',
+              style: TextStyle(color: Color(0xFF3DDC84))),
+          content: Form(
+            key: formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _dialogField(nombreCtrl, 'Nombre', Icons.person),
+                  const SizedBox(height: 12),
+                  _dialogField(correoCtrl, 'Correo', Icons.email),
+                  const SizedBox(height: 12),
+                  _passwordField(
+                    contraCtrl,
+                    'Contraseña',
+                    _showPassword,
+                    (value) => setStateDialog(() => _showPassword = value),
+                  ),
+                  const SizedBox(height: 12),
+                  _passwordField(
+                    contraConfirmCtrl,
+                    'Confirmar contraseña',
+                    _showConfirmPassword,
+                    (value) => setStateDialog(() => _showConfirmPassword = value),
+                    confirmPassword: contraCtrl.text,
+                  ),
+                ],
+              ),
             ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar',
+                  style: TextStyle(color: Color(0xFF6272A4))),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (formKey.currentState!.validate()) {
+                  Navigator.pop(context, true);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF3DDC84),
+                foregroundColor: const Color(0xFF0F0F1A),
+              ),
+              child: const Text('Guardar'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar',
-                style: TextStyle(color: Color(0xFF6272A4))),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (formKey.currentState!.validate()) {
-                Navigator.pop(context, true);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF3DDC84),
-              foregroundColor: const Color(0xFF0F0F1A),
-            ),
-            child: const Text('Guardar'),
-          ),
-        ],
       ),
     );
 
@@ -303,6 +320,55 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       validator: (v) =>
           (v == null || v.trim().isEmpty) ? 'Campo requerido' : null,
+    );
+  }
+
+  Widget _passwordField(
+    TextEditingController ctrl,
+    String label,
+    bool showPassword,
+    Function(bool) onShowPasswordChanged, {
+    String? confirmPassword,
+  }) {
+    return TextFormField(
+      controller: ctrl,
+      obscureText: !showPassword,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Color(0xFF6272A4)),
+        prefixIcon: Icon(Icons.lock, color: const Color(0xFF3DDC84), size: 20),
+        suffixIcon: IconButton(
+          icon: Icon(
+            showPassword ? Icons.visibility : Icons.visibility_off,
+            color: const Color(0xFF6272A4),
+          ),
+          onPressed: () => onShowPasswordChanged(!showPassword),
+        ),
+        filled: true,
+        fillColor: const Color(0xFF0F0F1A),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFF3D1F6E)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFF3D1F6E)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFF3DDC84), width: 1.5),
+        ),
+      ),
+      validator: (v) {
+        if (v == null || v.trim().isEmpty) {
+          return 'Campo requerido';
+        }
+        if (confirmPassword != null && v.trim() != confirmPassword.trim()) {
+          return 'Las contraseñas no coinciden';
+        }
+        return null;
+      },
     );
   }
 }

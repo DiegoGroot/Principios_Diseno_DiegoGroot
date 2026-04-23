@@ -45,4 +45,34 @@ public class UserController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody User user) {
+        System.out.println(">>> Recibida petición PUT para actualizar usuario ID: " + id);
+        if (userRepository.existsById(id)) {
+            User existingUser = userRepository.findById(id).get();
+            existingUser.setNombre(user.getNombre());
+            existingUser.setCorreo(user.getCorreo());
+            existingUser.setContrasena(user.getContrasena());
+            User updated = userRepository.save(existingUser);
+            System.out.println(">>> Usuario actualizado correctamente: " + updated.getCorreo());
+            return ResponseEntity.ok(updated);
+        } else {
+            System.out.println(">>> Usuario no encontrado con ID: " + id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        System.out.println(">>> Recibida petición DELETE para eliminar usuario ID: " + id);
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+            System.out.println(">>> Usuario eliminado correctamente: " + id);
+            return ResponseEntity.noContent().build();
+        } else {
+            System.out.println(">>> Usuario no encontrado para eliminar: " + id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
 }

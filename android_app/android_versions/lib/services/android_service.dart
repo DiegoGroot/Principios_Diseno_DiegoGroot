@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/android_version.dart';
 
 class AndroidService {
-  static const String baseUrl = 'https://android-versions.onrender.com/api/android-versions';
+  static const String baseUrl = 'http://localhost:8080/api/android-versions';
 
   static Future<List<AndroidVersion>> getAll(int userId) async {
     final response = await http.get(Uri.parse('$baseUrl?userId=$userId'));
