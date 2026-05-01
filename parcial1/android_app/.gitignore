@@ -1,0 +1,30 @@
+# Maven
+target/
+.m2/
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+build/
+.gradle/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.env.local
+
+# Flutter
+android_versions/build/
+android_versions/.dart_tool/
+android_versions/pubspec.lock
+
+# Java
+*.class
+*.log

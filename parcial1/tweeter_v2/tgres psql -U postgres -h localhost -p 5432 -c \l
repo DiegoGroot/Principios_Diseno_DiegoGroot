@@ -1,0 +1,22 @@
+                                                                              List of databases
+       Name       |         Owner         | Encoding | Locale Provider |   Collate   |    Ctype    | ICU Locale | ICU Rules |                Access privileges                
+------------------+-----------------------+----------+-----------------+-------------+-------------+------------+-----------+-------------------------------------------------
+ android_api      | postgres              | UTF8     | libc            | es_ES.UTF-8 | es_ES.UTF-8 |            |           | =Tc/postgres                                   +
+                  |                       |          |                 |             |             |            |           | postgres=CTc/postgres                          +
+                  |                       |          |                 |             |             |            |           | diegogroot=CTc/postgres
+ android_postgres | android_postgres_user | UTF8     | libc            | es_ES.UTF-8 | es_ES.UTF-8 |            |           | =Tc/android_postgres_user                      +
+                  |                       |          |                 |             |             |            |           | android_postgres_user=CTc/android_postgres_user
+ android_proyect  | postgres              | UTF8     | libc            | es_ES.UTF-8 | es_ES.UTF-8 |            |           | 
+ escuela          | postgres              | UTF8     | libc            | es_ES.UTF-8 | es_ES.UTF-8 |            |           | =Tc/postgres                                   +
+                  |                       |          |                 |             |             |            |           | postgres=CTc/postgres                          +
+                  |                       |          |                 |             |             |            |           | admin=CTc/postgres
+ postgres         | postgres              | UTF8     | libc            | es_ES.UTF-8 | es_ES.UTF-8 |            |           | 
+ template0        | postgres              | UTF8     | libc            | es_ES.UTF-8 | es_ES.UTF-8 |            |           | =c/postgres                                    +
+                  |                       |          |                 |             |             |            |           | postgres=CTc/postgres
+ template1        | postgres              | UTF8     | libc            | es_ES.UTF-8 | es_ES.UTF-8 |            |           | =c/postgres                                    +
+                  |                       |          |                 |             |             |            |           | postgres=CTc/postgres
+ test             | DiegoGroot            | UTF8     | libc            | es_ES.UTF-8 | es_ES.UTF-8 |            |           | =Tc/DiegoGroot                                 +
+                  |                       |          |                 |             |             |            |           | DiegoGroot=CTc/DiegoGroot
+ user_api         | postgres              | UTF8     | libc            | es_ES.UTF-8 | es_ES.UTF-8 |            |           | 
+(9 rows)
+
