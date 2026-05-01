@@ -1,3 +1,0 @@
-interface MetodoPago{
-void ProcesarPago();
-}
