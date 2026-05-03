@@ -17,10 +17,7 @@ class AndroidService {
     }
   }
 
-  static Future<AndroidVersion> create(
-    AndroidVersion version,
-    int userId,
-  ) async {
+  static Future<AndroidVersion> create(AndroidVersion version, int userId) async {
     final response = await http.post(
       Uri.parse('$baseUrl?userId=$userId'),
       headers: {'Content-Type': 'application/json'},
@@ -35,7 +32,7 @@ class AndroidService {
     if (response.statusCode == 200) {
       return AndroidVersion.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('Error al crear versión: ${response.body}');
+      throw Exception('Error al crear version: ' + response.body);
     }
   }
 
@@ -43,12 +40,8 @@ class AndroidService {
     await http.delete(Uri.parse('$baseUrl/$id'));
   }
 
-  // ── Comentarios ──────────────────────────────────────────────
-
   static Future<List<Map<String, dynamic>>> getComentarios(int tweetId) async {
-    final response = await http.get(
-      Uri.parse('$tweetUrl/$tweetId/comentarios'),
-    );
+    final response = await http.get(Uri.parse('$tweetUrl/$tweetId/comentarios'));
     if (response.statusCode == 200) {
       List<dynamic> body = jsonDecode(response.body);
       return body.cast<Map<String, dynamic>>();
@@ -64,18 +57,12 @@ class AndroidService {
       body: jsonEncode({'texto': texto}),
     );
     if (response.statusCode != 200) {
-      throw Exception(
-        'Error al agregar comentario: ${response.statusCode} - ${response.body}',
-      );
+      throw Exception('Error al agregar comentario: ' + response.statusCode.toString() + ' - ' + response.body);
     }
   }
 
-  // ── Reacciones ───────────────────────────────────────────────
-
   static Future<Map<String, dynamic>> getConteoReacciones(int tweetId) async {
-    final response = await http.get(
-      Uri.parse('$tweetUrl/$tweetId/reacciones/conteo'),
-    );
+    final response = await http.get(Uri.parse('$tweetUrl/$tweetId/reacciones/conteo'));
     if (response.statusCode == 200) {
       return Map<String, dynamic>.from(jsonDecode(response.body));
     } else {
@@ -90,7 +77,7 @@ class AndroidService {
       body: jsonEncode({'tipo': tipo}),
     );
     if (response.statusCode != 200) {
-      throw Exception('Error al agregar reacción: ${response.statusCode}');
+      throw Exception('Error al agregar reaccion: ' + response.statusCode.toString());
     }
   }
 }

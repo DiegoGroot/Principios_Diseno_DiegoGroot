@@ -40,32 +40,36 @@ class _DetailScreenState extends State<DetailScreen> {
   Future<void> _cargarComentarios() async {
     try {
       final data = await AndroidService.getComentarios(widget.version.id!);
-      if (mounted)
+      if (mounted) {
         setState(() {
           _comentarios = data;
           _loadingComentarios = false;
         });
+      }
     } catch (_) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _loadingComentarios = false;
         });
+      }
     }
   }
 
   Future<void> _cargarReacciones() async {
     try {
       final data = await AndroidService.getConteoReacciones(widget.version.id!);
-      if (mounted)
+      if (mounted) {
         setState(() {
           _reacciones = data;
           _loadingReacciones = false;
         });
+      }
     } catch (_) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _loadingReacciones = false;
         });
+      }
     }
   }
 
@@ -118,7 +122,7 @@ class _DetailScreenState extends State<DetailScreen> {
                   ? Image.network(
                       widget.version.urlPhoto,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _gradientPlaceholder(),
+                      errorBuilder: (_, _, _) => _gradientPlaceholder(),
                     )
                   : _gradientPlaceholder(),
             ),
