@@ -46,24 +46,35 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: const Color(0xFF3DDC84).withOpacity(0.12),
+                color: const Color(0xFF3DDC84).withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.android, color: Color(0xFF3DDC84), size: 22),
+              child: const Icon(
+                Icons.android,
+                color: Color(0xFF3DDC84),
+                size: 22,
+              ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('android-versions',
-                      style: TextStyle(
-                          color: Color(0xFF3DDC84),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16)),
-                  Text(widget.currentUser.nombre,
-                      style: const TextStyle(
-                          color: Color(0xFF6272A4), fontSize: 11)),
+                  const Text(
+                    'android-versions',
+                    style: TextStyle(
+                      color: Color(0xFF3DDC84),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    widget.currentUser.nombre,
+                    style: const TextStyle(
+                      color: Color(0xFF6272A4),
+                      fontSize: 11,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -107,24 +118,32 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-                child: CircularProgressIndicator(color: Color(0xFF3DDC84)));
+              child: CircularProgressIndicator(color: Color(0xFF3DDC84)),
+            );
           }
           if (snapshot.hasError) {
             return Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.error_outline,
-                      color: Colors.redAccent, size: 48),
+                  const Icon(
+                    Icons.error_outline,
+                    color: Colors.redAccent,
+                    size: 48,
+                  ),
                   const SizedBox(height: 12),
-                  Text('${snapshot.error}',
-                      style: const TextStyle(color: Color(0xFF6272A4))),
+                  Text(
+                    '${snapshot.error}',
+                    style: const TextStyle(color: Color(0xFF6272A4)),
+                  ),
                   const SizedBox(height: 16),
                   TextButton.icon(
                     onPressed: _load,
                     icon: const Icon(Icons.refresh, color: Color(0xFF3DDC84)),
-                    label: const Text('Reintentar',
-                        style: TextStyle(color: Color(0xFF3DDC84))),
+                    label: const Text(
+                      'Reintentar',
+                      style: TextStyle(color: Color(0xFF3DDC84)),
+                    ),
                   ),
                 ],
               ),
@@ -134,8 +153,10 @@ class _HomeScreenState extends State<HomeScreen> {
           final versions = snapshot.data ?? [];
           if (versions.isEmpty) {
             return const Center(
-              child: Text('No hay versiones aún.',
-                  style: TextStyle(color: Color(0xFF6272A4))),
+              child: Text(
+                'No hay versiones aún.',
+                style: TextStyle(color: Color(0xFF6272A4)),
+              ),
             );
           }
 
@@ -174,14 +195,17 @@ class _VersionCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
               child: version.urlPhoto.isNotEmpty
-                  ? Image.network(version.urlPhoto,
+                  ? Image.network(
+                      version.urlPhoto,
                       height: 140,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _placeholder())
+                      errorBuilder: (_, __, ___) => _placeholder(),
+                    )
                   : _placeholder(),
             ),
             Padding(
@@ -192,88 +216,124 @@ class _VersionCard extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(version.nombre,
-                            style: const TextStyle(
-                                color: Color(0xFF3DDC84),
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold)),
+                        child: Text(
+                          version.nombre,
+                          style: const TextStyle(
+                            color: Color(0xFF3DDC84),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF3DDC84).withOpacity(0.1),
+                          color: const Color(0xFF3DDC84).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                              color: const Color(0xFF3DDC84).withOpacity(0.25)),
+                            color: const Color(
+                              0xFF3DDC84,
+                            ).withValues(alpha: 0.25),
+                          ),
                         ),
-                        child: Text('ID ${version.id}',
-                            style: const TextStyle(
-                                color: Color(0xFF3DDC84), fontSize: 11)),
+                        child: Text(
+                          'ID ${version.id}',
+                          style: const TextStyle(
+                            color: Color(0xFF3DDC84),
+                            fontSize: 11,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(version.fecha,
-                      style: const TextStyle(
-                          color: Color(0xFF6272A4), fontSize: 12)),
+                  Text(
+                    version.fecha,
+                    style: const TextStyle(
+                      color: Color(0xFF6272A4),
+                      fontSize: 12,
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  Text(version.descripcion,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          color: Color(0xFFAAAAAA),
-                          fontSize: 13,
-                          height: 1.5)),
+                  Text(
+                    version.descripcion,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Color(0xFFAAAAAA),
+                      fontSize: 13,
+                      height: 1.5,
+                    ),
+                  ),
                   const SizedBox(height: 10),
                   Wrap(
                     spacing: 6,
                     runSpacing: 6,
                     children: version.caracteristicasList
                         .take(3)
-                        .map((c) => Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF242435),
-                                borderRadius: BorderRadius.circular(20),
-                                border:
-                                    Border.all(color: const Color(0xFF3D3D5C)),
+                        .map(
+                          (c) => Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF242435),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: const Color(0xFF3D3D5C),
                               ),
-                              child: Text(c,
-                                  style: const TextStyle(
-                                      color: Color(0xFF8888AA), fontSize: 11)),
-                            ))
+                            ),
+                            child: Text(
+                              c,
+                              style: const TextStyle(
+                                color: Color(0xFF8888AA),
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        )
                         .toList(),
                   ),
                   Align(
                     alignment: Alignment.centerRight,
                     child: IconButton(
-                      icon: const Icon(Icons.delete_outline,
-                          color: Color(0xFF6272A4), size: 20),
+                      icon: const Icon(
+                        Icons.delete_outline,
+                        color: Color(0xFF6272A4),
+                        size: 20,
+                      ),
                       onPressed: () async {
                         final ok = await showDialog<bool>(
                           context: context,
                           builder: (_) => AlertDialog(
                             backgroundColor: const Color(0xFF1A0A2E),
-                            title: const Text('Eliminar',
-                                style: TextStyle(color: Colors.white)),
-                            content: Text('¿Eliminar "${version.nombre}"?',
-                                style: const TextStyle(
-                                    color: Color(0xFF6272A4))),
+                            title: const Text(
+                              'Eliminar',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            content: Text(
+                              '¿Eliminar "${version.nombre}"?',
+                              style: const TextStyle(color: Color(0xFF6272A4)),
+                            ),
                             actions: [
                               TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(context, false),
-                                  child: const Text('Cancelar',
-                                      style: TextStyle(
-                                          color: Color(0xFF6272A4)))),
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Text(
+                                  'Cancelar',
+                                  style: TextStyle(color: Color(0xFF6272A4)),
+                                ),
+                              ),
                               TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(context, true),
-                                  child: const Text('Eliminar',
-                                      style: TextStyle(
-                                          color: Colors.redAccent))),
+                                onPressed: () => Navigator.pop(context, true),
+                                child: const Text(
+                                  'Eliminar',
+                                  style: TextStyle(color: Colors.redAccent),
+                                ),
+                              ),
                             ],
                           ),
                         );
@@ -293,10 +353,11 @@ class _VersionCard extends StatelessWidget {
   }
 
   Widget _placeholder() => Container(
-        height: 140,
-        width: double.infinity,
-        color: const Color(0xFF13091F),
-        child: const Center(
-            child: Icon(Icons.android, color: Color(0xFF3DDC84), size: 50)),
-      );
+    height: 140,
+    width: double.infinity,
+    color: const Color(0xFF13091F),
+    child: const Center(
+      child: Icon(Icons.android, color: Color(0xFF3DDC84), size: 50),
+    ),
+  );
 }
