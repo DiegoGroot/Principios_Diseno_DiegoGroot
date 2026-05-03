@@ -1,0 +1,555 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[top=2.5cm,bottom=2.5cm,left=2.8cm,right=2.8cm]{geometry}
+\usepackage[dvipsnames,svgnames,x11names]{xcolor}
+
+\definecolor{androidgreen}{HTML}{3DDC84}
+\definecolor{darkbg}{HTML}{1A0A2E}
+\definecolor{lightgray}{HTML}{F5F5F5}
+\definecolor{codebg}{HTML}{F0F8F4}
+\definecolor{commentgreen}{HTML}{2E7D32}
+\definecolor{keywordblue}{HTML}{1565C0}
+\definecolor{stringorange}{HTML}{E65100}
+\definecolor{linenumgray}{HTML}{9E9E9E}
+\definecolor{infobg}{HTML}{E8F5E9}
+
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+
+\usepackage{listings}
+\lstdefinestyle{javaStyle}{
+  backgroundcolor=\color{codebg},
+  commentstyle=\color{commentgreen}\itshape,
+  keywordstyle=\color{keywordblue}\bfseries,
+  stringstyle=\color{stringorange},
+  numberstyle=\tiny\color{linenumgray},
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  keepspaces=true,
+  numbers=left,
+  numbersep=8pt,
+  showstringspaces=false,
+  tabsize=2,
+  frame=none,
+  xleftmargin=18pt,
+  aboveskip=0pt,
+  belowskip=0pt,
+}
+\lstset{style=javaStyle}
+
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{colortbl}
+\usepackage{float}
+\usepackage{titlesec}
+\usepackage{parskip}
+\usepackage[colorlinks=true,linkcolor=darkbg,urlcolor=androidgreen]{hyperref}
+\usepackage{fancyhdr}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyhead[L]{\small\color{gray}\texttt{Android Versions App}}
+\fancyhead[R]{\small\color{gray}Parcial 2 --- Mayo 2026}
+\fancyfoot[C]{\small\color{gray}\thepage}
+
+\titleformat{\section}
+  {\color{darkbg}\large\bfseries}{}
+  {0em}
+  {\colorbox{androidgreen}{\color{white}\makebox[0.5cm][c]{\thesection}}\quad}
+  [\vspace{-0.3em}\textcolor{androidgreen}{\rule{\linewidth}{1.5pt}}]
+
+\titleformat{\subsection}
+  {\color{darkbg}\normalsize\bfseries}
+  {\color{androidgreen}\thesubsection\;}{0em}{}
+
+\titleformat{\subsubsection}
+  {\color{darkbg}\small\bfseries\itshape}{}{0em}{}
+
+\newtcolorbox{patternbox}[2][]{
+  enhanced, breakable,
+  colback=infobg, colframe=androidgreen,
+  fonttitle=\bfseries\small, title=#2,
+  arc=4pt, boxrule=1.5pt,
+  left=8pt, right=8pt, top=6pt, bottom=6pt, #1
+}
+
+\newtcolorbox{infobox}{
+  enhanced, colback=infobg, colframe=androidgreen,
+  arc=4pt, boxrule=1pt,
+  left=10pt, right=10pt, top=6pt, bottom=6pt,
+}
+
+\newtcolorbox{filebox}[1]{
+  enhanced, breakable,
+  colback=codebg, colframe=androidgreen!50,
+  title={\texttt{#1}},
+  fonttitle=\small\bfseries\ttfamily,
+  coltitle=white,
+  attach boxed title to top left={yshift=-2mm,xshift=6mm},
+  boxed title style={colback=darkbg,arc=2pt},
+  arc=4pt, boxrule=1pt,
+  left=0pt, right=0pt, top=8pt, bottom=4pt,
+}
+
+%=============================================================
+\begin{document}
+%=============================================================
+
+% ── Portada ──────────────────────────────────────────────────
+\begin{titlepage}
+\pagecolor{darkbg}
+\color{white}
+\centering
+\vspace*{2.5cm}
+
+\begin{tikzpicture}
+  \fill[androidgreen!20,rounded corners=10pt] (-2.2,-1.8) rectangle (2.2,2.2);
+  \fill[androidgreen] (-1.2,0) rectangle (1.2,1.5);
+  \fill[androidgreen] (-1.8,0.2) rectangle (-1.2,1.1);
+  \fill[androidgreen] (1.2,0.2) rectangle (1.8,1.1);
+  \fill[androidgreen] (-0.75,-1.4) rectangle (-0.15,0);
+  \fill[androidgreen] (0.15,-1.4) rectangle (0.75,0);
+  \fill[androidgreen] (-1.2,1.5) .. controls (-1.2,2.1) and (1.2,2.1) .. (1.2,1.5) -- cycle;
+  \fill[white] (-0.5,1.85) circle (0.17);
+  \fill[white] (0.5,1.85) circle (0.17);
+  \draw[androidgreen,line width=2.5pt] (-0.9,2.4) -- (-0.5,1.6);
+  \draw[androidgreen,line width=2.5pt] (0.9,2.4) -- (0.5,1.6);
+\end{tikzpicture}
+
+\vspace{1.5cm}
+{\fontsize{30}{36}\selectfont\bfseries Android Versions App}\\[0.5em]
+{\large\color{androidgreen} Documentacion Tecnica --- Parcial 2}\\[2em]
+
+\begin{tcolorbox}[
+  enhanced, colback=white!8, colframe=androidgreen,
+  arc=6pt, boxrule=1pt, width=10cm,
+  left=14pt, right=14pt, top=10pt, bottom=10pt,
+  center
+]
+\centering\color{black}
+\textbf{Autor:} Diego Alejandro Groot Cabrera\\[0.4em]
+\textbf{Profesor:} Adolfo Centeno \\[0.4em]
+\textbf{Entrega:} 8 de Mayo de 2026
+\end{tcolorbox}
+
+\vspace{2cm}
+{\color{gray}\ttfamily\small
+Flutter \quad|\quad Spring Boot \quad|\quad PostgreSQL \quad|\quad Docker \quad|\quad Render}
+
+\vfill
+{\color{androidgreen!50}\rule{8cm}{0.5pt}}\\[0.5em]
+{\footnotesize\color{gray} Principios de Diseño}
+\end{titlepage}
+
+\pagecolor{white}\color{black}
+\newpage
+\tableofcontents
+\newpage
+
+%=============================================================
+\section{Descripcion General del Proyecto}
+%=============================================================
+
+\begin{infobox}
+\textbf{Resumen:} Aplicacion multiplataforma para registrar versiones del
+sistema operativo Android, con soporte de reacciones emoji y comentarios
+por publicacion. Backend REST con Spring Boot y frontend Flutter.
+\end{infobox}
+
+\vspace{0.5em}
+
+La idea del proyecto es tener una especie de red social enfocada en
+versiones de Android. Cada usuario puede crear una publicacion con el
+nombre de la version, su fecha, descripcion y caracteristicas. Otros
+usuarios pueden reaccionar con emojis (like, love, haha, wow, sad) y
+tambien dejar comentarios de texto.
+
+El backend se hizo con \textbf{Spring Boot} y expone una API REST. La
+base de datos es \textbf{PostgreSQL}, tanto local como en la nube con Aiven
+(produccion). El frontend se construyo con \textbf{Flutter}, compilando
+la misma base de codigo para web y APK de Android. El proyecto esta
+desplegado en \textbf{Render} usando \textbf{Docker}.
+
+%=============================================================
+\section{Tecnologias Utilizadas}
+%=============================================================
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{>{\bfseries}l X}
+\rowcolor{darkbg}
+\multicolumn{1}{>{\color{white}\bfseries}l}{Tecnologia} &
+\multicolumn{1}{>{\color{white}\bfseries}X}{Uso en el proyecto} \\
+\rowcolor{lightgray}
+Flutter (Dart) & Interfaz: web, Linux desktop y APK Android \\
+\rowcolor{white}
+Spring Boot 4 & Framework backend, expone la API REST \\
+\rowcolor{lightgray}
+PostgreSQL 16 & Base de datos relacional en produccion y local \\
+\rowcolor{white}
+Hibernate / JPA & Mapeo objeto-relacional de las entidades \\
+\rowcolor{lightgray}
+Docker & Contenedorizacion del backend para despliegue \\
+\rowcolor{white}
+Render & Plataforma de despliegue en la nube \\
+\rowcolor{lightgray}
+Maven & Gestion de dependencias y build del proyecto Java \\
+\rowcolor{white}
+GitHub & Control de versiones \\
+\end{tabularx}
+\caption{Stack tecnologico del proyecto}
+\end{table}
+
+%=============================================================
+\section{Patrones de Diseno Utilizados}
+%=============================================================
+
+En el proyecto se utilizaron tres patrones de diseno de software:
+\textbf{Facade}, \textbf{Repository} y \textbf{MVC}. Cada uno resuelve
+un problema diferente en la arquitectura de la aplicacion.
+
+%─────────────────────────────────────────────────────────────
+\subsection{Patron Facade}
+%─────────────────────────────────────────────────────────────
+
+\begin{patternbox}{Que es el patron Facade?}
+La idea del Facade es poner una capa intermedia que oculte la complejidad
+de un sistema. En lugar de que quien llama tenga que saber con cuantas
+clases interactuar, hay una sola clase fachada que lo resuelve todo
+internamente. Es como un cajero automatico: uno solo presiona los botones
+y la maquina se encarga del resto sin que uno sepa que pasa adentro.
+\end{patternbox}
+
+\subsubsection{Por que se uso en este proyecto?}
+
+Los controladores REST necesitaban hacer varias operaciones con la base
+de datos: buscar una version de Android por ID, crear un comentario
+asociado, crear una reaccion, contar cuantas reacciones hay por tipo,
+etc. Sin un Facade, cada controlador tendria que importar directamente
+varios repositorios. Con \texttt{TweetFacade} se centraliza toda esa
+logica y los controladores solo llaman a la fachada con lo minimo
+necesario.
+
+\subsubsection{Codigo implementado}
+
+\begin{filebox}{TweetFacade.java}
+\begin{lstlisting}[language=Java]
+@Service
+public class TweetFacade {
+
+    private final AndroidRepository tweetRepository;
+    private final ComentarioRepository comentarioRepository;
+    private final ReaccionRepository reaccionRepository;
+
+    public Comentario agregarComentario(Long tweetId, String texto) {
+        android_tweet tweet = tweetRepository.findById(tweetId)
+            .orElseThrow(() -> new RuntimeException(
+                "El Tweet con ID " + tweetId + " no existe."));
+        return comentarioRepository.save(new Comentario(texto, tweet));
+    }
+
+    public Reaccion agregarReaccion(Long tweetId, String tipo) {
+        android_tweet tweet = tweetRepository.findById(tweetId)
+            .orElseThrow(() -> new RuntimeException("Tweet no encontrado"));
+        return reaccionRepository.save(new Reaccion(tipo, tweet));
+    }
+
+    public Map<String, Long> contarReacciones(Long tweetId) {
+        List<Reaccion> reacciones =
+            reaccionRepository.findByTweetId(tweetId);
+        Map<String, Long> conteo = new HashMap<>();
+        for (Reaccion r : reacciones) {
+            conteo.merge(r.getTipo(), 1L, Long::sum);
+        }
+        return conteo;
+    }
+}
+\end{lstlisting}
+\end{filebox}
+
+\vspace{0.5em}
+
+El controlador usa la fachada sin saber nada de como funciona internamente:
+
+\begin{filebox}{ComentarioController.java}
+\begin{lstlisting}[language=Java]
+@CrossOrigin(origins = "*")
+@RestController
+@RequestMapping("/api/tweets")
+public class ComentarioController {
+
+    private final TweetFacade tweetFacade;
+
+    @PostMapping("/{id}/comentarios")
+    public ResponseEntity<?> agregar(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+        try {
+            Comentario c = tweetFacade.agregarComentario(
+                id, body.get("texto"));
+            return ResponseEntity.ok(c);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404)
+                .body(Map.of("error", e.getMessage()));
+        }
+    }
+}
+\end{lstlisting}
+\end{filebox}
+
+\vspace{0.5em}
+
+Diagrama de como la fachada separa los controladores de los repositorios:
+
+\begin{center}
+\begin{tikzpicture}[
+  box/.style={draw=androidgreen,fill=infobg,rounded corners=4pt,
+              minimum width=3cm,minimum height=0.8cm,
+              font=\small\ttfamily,align=center},
+  arrow/.style={-Stealth,thick,color=androidgreen}
+]
+\node[box] (cc) at (0,2.5)  {Comentario\\Controller};
+\node[box] (rc) at (5,2.5)  {Reaccion\\Controller};
+\node[box,fill=androidgreen!25,minimum width=4cm]
+          (tf) at (2.5,0.8) {TweetFacade};
+\node[box] (ar) at (0,-1)   {Android\\Repository};
+\node[box] (cr) at (2.5,-1) {Comentario\\Repository};
+\node[box] (rr) at (5,-1)   {Reaccion\\Repository};
+\draw[arrow] (cc) -- (tf);
+\draw[arrow] (rc) -- (tf);
+\draw[arrow] (tf) -- (ar);
+\draw[arrow] (tf) -- (cr);
+\draw[arrow] (tf) -- (rr);
+\end{tikzpicture}
+\end{center}
+
+%─────────────────────────────────────────────────────────────
+\subsection{Patron Repository}
+%─────────────────────────────────────────────────────────────
+
+\begin{patternbox}{Que es el patron Repository?}
+El Repository actua como una coleccion de objetos en memoria. En lugar
+de escribir SQL directamente en la logica de negocio, se crea una
+interfaz que define que operaciones se pueden hacer con cada entidad.
+Spring Data JPA genera automaticamente la implementacion a partir
+del nombre de los metodos, sin necesidad de escribir SQL.
+\end{patternbox}
+
+\subsubsection{Por que se uso en este proyecto?}
+
+Separar el acceso a datos de la logica hace que el codigo sea mas limpio.
+Si se cambia la base de datos, solo hay que modificar el repositorio y no
+toda la aplicacion. Spring Data JPA genera el SQL automaticamente a partir
+del nombre del metodo, lo que reduce errores y codigo repetitivo.
+
+\subsubsection{Codigo implementado}
+
+\begin{filebox}{ComentarioRepository.java}
+\begin{lstlisting}[language=Java]
+@Repository
+public interface ComentarioRepository
+        extends JpaRepository<Comentario, Long> {
+
+    // Spring genera automaticamente:
+    // SELECT * FROM comentarios WHERE tweet_id = ?
+    List<Comentario> findByTweetId(Long tweetId);
+}
+\end{lstlisting}
+\end{filebox}
+
+\vspace{0.4em}
+
+\begin{filebox}{ReaccionRepository.java}
+\begin{lstlisting}[language=Java]
+@Repository
+public interface ReaccionRepository
+        extends JpaRepository<Reaccion, Long> {
+
+    List<Reaccion> findByTweetId(Long tweetId);
+    long countByTweetId(Long tweetId);
+}
+\end{lstlisting}
+\end{filebox}
+
+%─────────────────────────────────────────────────────────────
+\subsection{Patron MVC (Model -- View -- Controller)}
+%─────────────────────────────────────────────────────────────
+
+\begin{patternbox}{Que es el patron MVC?}
+MVC divide la aplicacion en tres capas: el \textbf{Modelo} maneja
+los datos, la \textbf{Vista} muestra la interfaz al usuario, y el
+\textbf{Controlador} recibe las peticiones y coordina entre los otros
+dos. Esto permite cambiar la interfaz sin tocar la logica del negocio.
+\end{patternbox}
+
+\subsubsection{Como se aplico en el proyecto?}
+
+MVC se aplica en dos niveles. En el backend, Spring Boot usa
+\texttt{@RestController} como controladores y las clases
+\texttt{@Entity} como modelos. En el frontend, Flutter actua como la
+vista que consume la API y muestra los datos al usuario.
+
+\subsubsection{Codigo implementado}
+
+\textbf{Modelo} --- entidad JPA que mapea la tabla de reacciones:
+
+\begin{filebox}{Reaccion.java --- Modelo}
+\begin{lstlisting}[language=Java]
+@Entity
+@Table(name = "reacciones")
+public class Reaccion {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String tipo;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tweet_id")
+    private android_tweet tweet;
+}
+\end{lstlisting}
+\end{filebox}
+
+\vspace{0.5em}
+\textbf{Vista} --- pantalla de detalle en Flutter:
+
+\begin{filebox}{detail\_screen.dart --- Vista (Flutter)}
+\begin{lstlisting}[language=Java,
+  literate={_}{\_}1 {!}{!}1
+]
+// La vista solo llama al servicio y actualiza la UI
+Future<void> _reaccionar(String tipo) async {
+    await AndroidService.agregarReaccion(
+        widget.version.id, tipo);
+    await _cargarReacciones();
+}
+
+Future<void> _enviarComentario() async {
+    final texto = comentarioCtrl.text.trim();
+    await AndroidService.agregarComentario(
+        widget.version.id, texto);
+    comentarioCtrl.clear();
+    await _cargarComentarios();
+}
+\end{lstlisting}
+\end{filebox}
+
+%=============================================================
+\section{Endpoints de la API REST}
+%=============================================================
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{>{\ttfamily\footnotesize}l
+                              >{\ttfamily\footnotesize}l X}
+\rowcolor{darkbg}
+\multicolumn{1}{>{\color{white}\bfseries\rmfamily\small}l}{Metodo} &
+\multicolumn{1}{>{\color{white}\bfseries\rmfamily\small}l}{Ruta} &
+\multicolumn{1}{>{\color{white}\bfseries\rmfamily\small}X}{Descripcion} \\
+\rowcolor{androidgreen!15}
+\multicolumn{3}{l}{\textbf{\small Versiones de Android}} \\
+GET    & /api/android-versions & Obtener versiones de un usuario \\
+\rowcolor{lightgray}
+POST   & /api/android-versions & Crear nueva version \\
+DELETE & /api/android-versions/\{id\} & Eliminar version por ID \\
+\rowcolor{androidgreen!15}
+\multicolumn{3}{l}{\textbf{\small Usuarios}} \\
+\rowcolor{lightgray}
+POST   & /api/users            & Registrar nuevo usuario \\
+POST   & /api/users/login      & Iniciar sesion \\
+\rowcolor{lightgray}
+PUT    & /api/users/\{id\}     & Actualizar datos del usuario \\
+DELETE & /api/users/\{id\}     & Eliminar cuenta \\
+\rowcolor{androidgreen!15}
+\multicolumn{3}{l}{\textbf{\small Reacciones y Comentarios}} \\
+\rowcolor{lightgray}
+POST   & /api/tweets/\{id\}/reacciones & Agregar reaccion \\
+GET    & /api/tweets/\{id\}/reacciones/conteo & Conteo por tipo \\
+\rowcolor{lightgray}
+POST   & /api/tweets/\{id\}/comentarios & Agregar comentario \\
+GET    & /api/tweets/\{id\}/comentarios & Lista de comentarios \\
+\end{tabularx}
+\caption{Endpoints completos de la API REST}
+\end{table}
+
+%=============================================================
+\section{Arquitectura y Despliegue}
+%=============================================================
+
+\begin{center}
+\begin{tikzpicture}[
+  layer/.style={draw=#1,fill=#1!10,rounded corners=6pt,
+                minimum width=10cm,minimum height=1.2cm,
+                font=\small\bfseries,align=center},
+  arrow/.style={-Stealth,thick,color=gray}
+]
+\node[layer=androidgreen] (flutter) at (0,4)
+  {Flutter (Vista)\\
+   \footnotesize\normalfont Web --- Linux Desktop --- APK Android};
+\node[layer=blue] (spring) at (0,2)
+  {Spring Boot (Controlador + Facade)\\
+   \footnotesize\normalfont API REST en puerto 8080};
+\node[layer=orange] (db) at (0,0)
+  {PostgreSQL (Modelo)\\
+   \footnotesize\normalfont Tablas: users, android\_tweet, reacciones, comentarios};
+\draw[arrow] (flutter) -- node[right,font=\footnotesize]{HTTP / REST} (spring);
+\draw[arrow] (spring) -- node[right,font=\footnotesize]{JPA / Hibernate} (db);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.5em}
+
+El backend se empaqueta con Maven en un JAR y se contenedoriza con Docker.
+La imagen se sube a Docker Hub y Render la descarga para el despliegue.
+Las variables de entorno \texttt{DATABASE\_URL}, \texttt{DB\_USER} y
+\texttt{DB\_PASSWORD} configuran la conexion a PostgreSQL en Aiven.
+
+\begin{tcolorbox}[
+  enhanced, colback=darkbg, colframe=androidgreen,
+  arc=4pt, boxrule=1pt,
+  left=10pt, right=10pt, top=8pt, bottom=8pt,
+]
+\color{androidgreen}\ttfamily\small
+\$ mvn spring-boot:run -Dspring-boot.run.profiles=local\\[2pt]
+\$ flutter run -d chrome
+\end{tcolorbox}
+
+%=============================================================
+\section{Conclusion}
+%=============================================================
+
+El uso de los patrones \textbf{Facade}, \textbf{Repository} y \textbf{MVC}
+permitio organizar el proyecto de una forma clara donde cada clase tiene
+una sola responsabilidad.
+
+La \textbf{fachada} fue el patron mas importante porque evito que los
+controladores tuvieran que conocer los detalles de como se guarda un
+comentario o como se cuentan las reacciones. Todo queda encapsulado en
+\texttt{TweetFacade} y los controladores simplemente delegan.
+
+Los \textbf{repositorios} hicieron que el acceso a datos fuera muy limpio.
+Spring Data JPA genera el SQL automaticamente, lo que reduce errores y
+codigo repetitivo.
+
+El patron \textbf{MVC} permitio desarrollar el backend y el frontend de
+forma independiente. Flutter no sabe nada de la base de datos: solo consume
+la API REST y muestra los datos al usuario.
+
+\vspace{2em}
+\begin{center}
+\end{center}
+
+\end{document}
