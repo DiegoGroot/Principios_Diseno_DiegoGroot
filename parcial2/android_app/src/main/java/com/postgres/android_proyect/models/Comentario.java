@@ -1,6 +1,7 @@
 package com.postgres.android_proyect.models;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "comentarios")
@@ -14,6 +15,7 @@ public class Comentario {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tweet_id")
+    @JsonIgnore
     private android_tweet tweet;
 
     public Comentario() {}

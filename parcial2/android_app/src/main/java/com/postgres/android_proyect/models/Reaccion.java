@@ -1,6 +1,7 @@
 package com.postgres.android_proyect.models;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "reacciones")
@@ -10,10 +11,11 @@ public class Reaccion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String tipo; // "like", "love", "haha", etc.
+    private String tipo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tweet_id")
+    @JsonIgnore
     private android_tweet tweet;
 
     public Reaccion() {}

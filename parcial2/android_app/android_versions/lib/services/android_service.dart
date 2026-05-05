@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/android_version.dart';
 
 class AndroidService {
-  static const String _base = 'https://android-versions.onrender.com';
+  static const String _base = 'http://127.0.0.1:8080';
   static const String baseUrl = '$_base/api/android-versions';
   static const String tweetUrl = '$_base/api/tweets';
 
