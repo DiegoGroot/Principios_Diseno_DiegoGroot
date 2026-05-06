@@ -2,9 +2,7 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[spanish]{babel}
-\usepackage{lmodern}
-\usepackage{microtype}
+
 \usepackage[top=2.5cm,bottom=2.5cm,left=2.8cm,right=2.8cm]{geometry}
 \usepackage[dvipsnames,svgnames,x11names]{xcolor}
 
@@ -17,10 +15,12 @@
 \definecolor{stringorange}{HTML}{E65100}
 \definecolor{linenumgray}{HTML}{9E9E9E}
 \definecolor{infobg}{HTML}{E8F5E9}
+\definecolor{warnbg}{HTML}{FFF8E1}
+\definecolor{warnframe}{HTML}{F9A825}
 
 \usepackage{graphicx}
 \usepackage{tikz}
-\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc,fit,backgrounds}
 \usepackage{tcolorbox}
 \tcbuselibrary{skins,breakable}
 
@@ -80,6 +80,13 @@
   fonttitle=\bfseries\small, title=#2,
   arc=4pt, boxrule=1.5pt,
   left=8pt, right=8pt, top=6pt, bottom=6pt, #1
+}
+
+\newtcolorbox{warnbox}[1]{
+  enhanced, colback=warnbg, colframe=warnframe,
+  fonttitle=\bfseries\small, title=#1,
+  arc=4pt, boxrule=1.5pt,
+  left=8pt, right=8pt, top=6pt, bottom=6pt,
 }
 
 \newtcolorbox{infobox}{
@@ -147,7 +154,7 @@ Flutter \quad|\quad Spring Boot \quad|\quad PostgreSQL \quad|\quad Docker \quad|
 
 \vfill
 {\color{androidgreen!50}\rule{8cm}{0.5pt}}\\[0.5em]
-{\footnotesize\color{gray} Principios de Diseño}
+{\footnotesize\color{gray} Principios de Diseno}
 \end{titlepage}
 
 \pagecolor{white}\color{black}
@@ -162,7 +169,8 @@ Flutter \quad|\quad Spring Boot \quad|\quad PostgreSQL \quad|\quad Docker \quad|
 \begin{infobox}
 \textbf{Resumen:} Aplicacion multiplataforma para registrar versiones del
 sistema operativo Android, con soporte de reacciones emoji y comentarios
-por publicacion. Backend REST con Spring Boot y frontend Flutter.
+por publicacion. Backend REST con Spring Boot y frontend Flutter compilado
+para web, Linux desktop y APK Android.
 \end{infobox}
 
 \vspace{0.5em}
@@ -170,14 +178,14 @@ por publicacion. Backend REST con Spring Boot y frontend Flutter.
 La idea del proyecto es tener una especie de red social enfocada en
 versiones de Android. Cada usuario puede crear una publicacion con el
 nombre de la version, su fecha, descripcion y caracteristicas. Otros
-usuarios pueden reaccionar con emojis (like, love, haha, wow, sad) y
+usuarios pueden reaccionar con emojis (\texttt{like, love, haha, wow, sad}) y
 tambien dejar comentarios de texto.
 
 El backend se hizo con \textbf{Spring Boot} y expone una API REST. La
-base de datos es \textbf{PostgreSQL}, tanto local como en la nube con Aiven
-(produccion). El frontend se construyo con \textbf{Flutter}, compilando
-la misma base de codigo para web y APK de Android. El proyecto esta
-desplegado en \textbf{Render} usando \textbf{Docker}.
+base de datos es \textbf{PostgreSQL} en produccion (Aiven). El frontend
+se construyo con \textbf{Flutter}, compilando la misma base de codigo para
+web y APK de Android. El proyecto esta desplegado en \textbf{Render}
+usando \textbf{Docker}.
 
 %=============================================================
 \section{Tecnologias Utilizadas}
@@ -215,59 +223,192 @@ GitHub & Control de versiones \\
 %=============================================================
 
 En el proyecto se utilizaron tres patrones de diseno de software:
-\textbf{Facade}, \textbf{Repository} y \textbf{MVC}. Cada uno resuelve
-un problema diferente en la arquitectura de la aplicacion.
+\textbf{Facade} (estructural), \textbf{Repository} (arquitectural) y
+\textbf{MVC} (arquitectural). El patron mas importante desde la perspectiva
+de diseno estructural es Facade, que se analiza en profundidad en la
+siguiente seccion.
 
-%─────────────────────────────────────────────────────────────
-\subsection{Patron Facade}
-%─────────────────────────────────────────────────────────────
+%=============================================================
+\section{Patron Estructural: Facade}
+%=============================================================
 
-\begin{patternbox}{Que es el patron Facade?}
-La idea del Facade es poner una capa intermedia que oculte la complejidad
-de un sistema. En lugar de que quien llama tenga que saber con cuantas
-clases interactuar, hay una sola clase fachada que lo resuelve todo
-internamente. Es como un cajero automatico: uno solo presiona los botones
-y la maquina se encarga del resto sin que uno sepa que pasa adentro.
+\begin{patternbox}{?`Que es un patron estructural?}
+Los \textbf{patrones estructurales} se ocupan de como se componen las
+clases y los objetos para formar estructuras mas grandes. No se enfocan
+en crear objetos (eso es trabajo de los patrones creacionales) ni en
+como interactuan en tiempo de ejecucion (eso es trabajo de los
+comportamentales). Su objetivo es simplificar las relaciones entre clases,
+reducir el acoplamiento y hacer que el sistema sea mas facil de entender
+y mantener. Ejemplos de patrones estructurales del catalogo GoF:
+\textbf{Adapter, Bridge, Composite, Decorator, Facade, Flyweight, Proxy}.
 \end{patternbox}
 
-\subsubsection{Por que se uso en este proyecto?}
+\vspace{0.5em}
 
-Los controladores REST necesitaban hacer varias operaciones con la base
-de datos: buscar una version de Android por ID, crear un comentario
-asociado, crear una reaccion, contar cuantas reacciones hay por tipo,
-etc. Sin un Facade, cada controlador tendria que importar directamente
-varios repositorios. Con \texttt{TweetFacade} se centraliza toda esa
-logica y los controladores solo llaman a la fachada con lo minimo
-necesario.
+\subsection{Definicion del patron Facade}
 
-\subsubsection{Codigo implementado}
+\begin{patternbox}{?`Que es el patron Facade?}
+\textbf{Facade} (Fachada) proporciona una interfaz simplificada a un
+conjunto de interfaces en un subsistema. Define una interfaz de nivel
+superior que hace que el subsistema sea mas facil de usar. En lugar de
+que el cliente tenga que conocer y coordinar multiples clases internas,
+habla con una sola clase fachada que lo resuelve todo internamente.
+\end{patternbox}
 
-\begin{filebox}{TweetFacade.java}
+La analogia clasica es la de un cajero automatico: el usuario solo
+presiona botones, sin saber que por detras hay comunicacion con el
+banco, verificacion de saldo, actualizacion de registros contables y
+emision de comprobantes. Toda esa complejidad esta \textit{detras de la fachada}.
+
+\subsection{Estructura general del patron}
+
+\begin{center}
+\begin{tikzpicture}[
+  client/.style={draw=darkbg,fill=darkbg!10,rounded corners=4pt,
+                 minimum width=2.5cm,minimum height=0.9cm,
+                 font=\small\bfseries,align=center},
+  facade/.style={draw=androidgreen,fill=androidgreen!20,rounded corners=4pt,
+                 minimum width=3.5cm,minimum height=1cm,
+                 font=\small\bfseries,align=center},
+  subsys/.style={draw=gray,fill=lightgray,rounded corners=4pt,
+                 minimum width=2.6cm,minimum height=0.8cm,
+                 font=\small\ttfamily,align=center},
+  arrow/.style={-Stealth,thick},
+  darrow/.style={-Stealth,thick,color=gray,dashed}
+]
+\node[client] (client) at (-4,0) {Cliente};
+\node[facade] (facade) at (0,0) {Facade};
+\node[subsys] (s1) at (3.5, 1.5)  {Subsistema A};
+\node[subsys] (s2) at (3.5, 0)    {Subsistema B};
+\node[subsys] (s3) at (3.5,-1.5)  {Subsistema C};
+
+\draw[arrow,color=darkbg] (client) -- node[above,font=\footnotesize]{llama} (facade);
+\draw[darrow] (facade) -- (s1);
+\draw[darrow] (facade) -- (s2);
+\draw[darrow] (facade) -- (s3);
+
+\begin{pgfonlayer}{background}
+  \node[draw=androidgreen!40,fill=androidgreen!5,rounded corners=6pt,
+        fit=(s1)(s2)(s3),inner sep=8pt,
+        label={[font=\footnotesize\color{androidgreen}]above:Subsistema complejo}] {};
+\end{pgfonlayer}
+\end{tikzpicture}
+\end{center}
+
+\subsection{Por que se uso en este proyecto?}
+
+Sin un Facade, cada controlador REST tendria que importar directamente
+\texttt{AndroidRepository}, \texttt{ComentarioRepository} y
+\texttt{ReaccionRepository}, y ademas conocer la logica de como
+buscar un tweet, validar que existe, crear la entidad relacionada y
+guardarla. Eso genera \textbf{acoplamiento fuerte}: si cambia la
+logica de almacenamiento, hay que modificar cada controlador.
+
+Con \texttt{TweetFacade}, los controladores solo conocen a la fachada
+y le delegan todo. La fachada \textit{esconde} la complejidad de
+coordinar tres repositorios.
+
+\subsection{Problema sin Facade vs. solucion con Facade}
+
+\begin{warnbox}{Sin Facade: controlador acoplado a multiples repositorios}
+\begin{lstlisting}[language=Java]
+// SIN FACADE - el controlador tiene que conocer TODOS los repositorios
+@RestController
+public class ComentarioController {
+    // Acoplado a 3 repositorios directamente
+    private final AndroidRepository tweetRepo;
+    private final ComentarioRepository comentarioRepo;
+    private final ReaccionRepository reaccionRepo;
+
+    @PostMapping("/{id}/comentarios")
+    public ResponseEntity<?> agregar(@PathVariable Long id,
+                                     @RequestBody Map<String,String> body) {
+        // Logica duplicada en cada controlador
+        android_tweet tweet = tweetRepo.findById(id)
+            .orElseThrow(() -> new RuntimeException("No existe"));
+        Comentario c = new Comentario(body.get("texto"), tweet);
+        comentarioRepo.save(c);
+        return ResponseEntity.ok(c);
+    }
+}
+\end{lstlisting}
+\end{warnbox}
+
+\begin{patternbox}{Con Facade: controlador simple y logica centralizada}
+\begin{lstlisting}[language=Java]
+// CON FACADE - el controlador solo conoce a TweetFacade
+@RestController
+public class ComentarioController {
+    private final TweetFacade tweetFacade; // UNA sola dependencia
+
+    @PostMapping("/{id}/comentarios")
+    public ResponseEntity<?> agregar(@PathVariable Long id,
+                                     @RequestBody Map<String,String> body) {
+        // Solo delega, no sabe como funciona internamente
+        Comentario c = tweetFacade.agregarComentario(id, body.get("texto"));
+        return ResponseEntity.ok(c);
+    }
+}
+\end{lstlisting}
+\end{patternbox}
+
+\subsection{Codigo implementado: TweetFacade}
+
+Esta es la clase fachada real del proyecto. Coordina los tres repositorios
+internamente y expone metodos simples y cohesivos:
+
+\begin{filebox}{TweetFacade.java --- La Fachada}
 \begin{lstlisting}[language=Java]
 @Service
 public class TweetFacade {
 
+    // Los tres subsistemas que la fachada coordina
     private final AndroidRepository tweetRepository;
     private final ComentarioRepository comentarioRepository;
     private final ReaccionRepository reaccionRepository;
 
+    public TweetFacade(AndroidRepository tweetRepository,
+                       ComentarioRepository comentarioRepository,
+                       ReaccionRepository reaccionRepository) {
+        this.tweetRepository = tweetRepository;
+        this.comentarioRepository = comentarioRepository;
+        this.reaccionRepository = reaccionRepository;
+    }
+
+    // Operacion 1: agregar comentario (busca tweet + crea + guarda)
     public Comentario agregarComentario(Long tweetId, String texto) {
         android_tweet tweet = tweetRepository.findById(tweetId)
             .orElseThrow(() -> new RuntimeException(
-                "El Tweet con ID " + tweetId + " no existe."));
-        return comentarioRepository.save(new Comentario(texto, tweet));
+                "Error: El Tweet con ID " + tweetId
+                + " no existe en la DB."));
+        Comentario comentario = new Comentario(texto, tweet);
+        return comentarioRepository.save(comentario);
     }
 
+    // Operacion 2: listar comentarios de un tweet
+    public List<Comentario> obtenerComentarios(Long tweetId) {
+        return comentarioRepository.findByTweetId(tweetId);
+    }
+
+    // Operacion 3: agregar reaccion (busca tweet + crea + guarda)
     public Reaccion agregarReaccion(Long tweetId, String tipo) {
         android_tweet tweet = tweetRepository.findById(tweetId)
-            .orElseThrow(() -> new RuntimeException("Tweet no encontrado"));
-        return reaccionRepository.save(new Reaccion(tipo, tweet));
+            .orElseThrow(() -> new RuntimeException(
+                "Tweet no encontrado"));
+        Reaccion reaccion = new Reaccion(tipo, tweet);
+        return reaccionRepository.save(reaccion);
     }
 
+    // Operacion 4: listar reacciones
+    public List<Reaccion> obtenerReacciones(Long tweetId) {
+        return reaccionRepository.findByTweetId(tweetId);
+    }
+
+    // Operacion 5: contar reacciones por tipo (like:5, love:2, ...)
     public Map<String, Long> contarReacciones(Long tweetId) {
         List<Reaccion> reacciones =
             reaccionRepository.findByTweetId(tweetId);
-        Map<String, Long> conteo = new HashMap<>();
+        Map<String, Long> conteo = new java.util.HashMap<>();
         for (Reaccion r : reacciones) {
             conteo.merge(r.getTipo(), 1L, Long::sum);
         }
@@ -277,9 +418,7 @@ public class TweetFacade {
 \end{lstlisting}
 \end{filebox}
 
-\vspace{0.5em}
-
-El controlador usa la fachada sin saber nada de como funciona internamente:
+\subsection{Codigo implementado: Controladores que usan la Facade}
 
 \begin{filebox}{ComentarioController.java}
 \begin{lstlisting}[language=Java]
@@ -289,6 +428,10 @@ El controlador usa la fachada sin saber nada de como funciona internamente:
 public class ComentarioController {
 
     private final TweetFacade tweetFacade;
+
+    public ComentarioController(TweetFacade tweetFacade) {
+        this.tweetFacade = tweetFacade;
+    }
 
     @PostMapping("/{id}/comentarios")
     public ResponseEntity<?> agregar(
@@ -303,41 +446,158 @@ public class ComentarioController {
                 .body(Map.of("error", e.getMessage()));
         }
     }
+
+    @GetMapping("/{id}/comentarios")
+    public ResponseEntity<List<Comentario>> listar(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(
+            tweetFacade.obtenerComentarios(id));
+    }
 }
 \end{lstlisting}
 \end{filebox}
 
-\vspace{0.5em}
+\begin{filebox}{ReaccionController.java}
+\begin{lstlisting}[language=Java]
+@CrossOrigin(origins = "*")
+@RestController
+@RequestMapping("/api/tweets")
+public class ReaccionController {
 
-Diagrama de como la fachada separa los controladores de los repositorios:
+    private final TweetFacade tweetFacade;
+
+    public ReaccionController(TweetFacade tweetFacade) {
+        this.tweetFacade = tweetFacade;
+    }
+
+    @PostMapping("/{id}/reacciones")
+    public ResponseEntity<?> reaccionar(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+        try {
+            Reaccion r = tweetFacade.agregarReaccion(
+                id, body.get("tipo"));
+            return ResponseEntity.ok(r);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404)
+                .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/{id}/reacciones")
+    public ResponseEntity<List<Reaccion>> listar(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(
+            tweetFacade.obtenerReacciones(id));
+    }
+
+    @GetMapping("/{id}/reacciones/conteo")
+    public ResponseEntity<Map<String, Long>> conteo(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(
+            tweetFacade.contarReacciones(id));
+    }
+}
+\end{lstlisting}
+\end{filebox}
+
+\subsection{Diagrama UML del patron Facade en el proyecto}
+
+El siguiente diagrama muestra como \texttt{TweetFacade} actua como la
+unica puerta de entrada que los controladores usan para acceder al
+subsistema de repositorios y modelos:
 
 \begin{center}
 \begin{tikzpicture}[
-  box/.style={draw=androidgreen,fill=infobg,rounded corners=4pt,
-              minimum width=3cm,minimum height=0.8cm,
-              font=\small\ttfamily,align=center},
-  arrow/.style={-Stealth,thick,color=androidgreen}
+  ctrl/.style={draw=darkbg,fill=darkbg!8,rounded corners=4pt,
+               minimum width=3.8cm,minimum height=1cm,
+               font=\small\ttfamily,align=center},
+  facade/.style={draw=androidgreen,fill=androidgreen!18,rounded corners=6pt,
+                 minimum width=4.2cm,minimum height=1.2cm,
+                 font=\small\bfseries\ttfamily,align=center},
+  repo/.style={draw=blue!60,fill=blue!8,rounded corners=4pt,
+               minimum width=3.4cm,minimum height=0.85cm,
+               font=\small\ttfamily,align=center},
+  model/.style={draw=orange!70,fill=orange!8,rounded corners=4pt,
+                minimum width=3.0cm,minimum height=0.8cm,
+                font=\small\ttfamily,align=center},
+  arrow/.style={-Stealth,thick,color=androidgreen},
+  darrow/.style={-Stealth,thick,color=blue!50,dashed},
+  marrow/.style={-Stealth,thick,color=orange!70,dashed}
 ]
-\node[box] (cc) at (0,2.5)  {Comentario\\Controller};
-\node[box] (rc) at (5,2.5)  {Reaccion\\Controller};
-\node[box,fill=androidgreen!25,minimum width=4cm]
-          (tf) at (2.5,0.8) {TweetFacade};
-\node[box] (ar) at (0,-1)   {Android\\Repository};
-\node[box] (cr) at (2.5,-1) {Comentario\\Repository};
-\node[box] (rr) at (5,-1)   {Reaccion\\Repository};
-\draw[arrow] (cc) -- (tf);
-\draw[arrow] (rc) -- (tf);
-\draw[arrow] (tf) -- (ar);
-\draw[arrow] (tf) -- (cr);
-\draw[arrow] (tf) -- (rr);
+
+% Controladores (izquierda)
+\node[ctrl] (cc) at (0, 2.2)  {Comentario\\Controller};
+\node[ctrl] (rc) at (0, 0)    {Reaccion\\Controller};
+
+% Facade (centro)
+\node[facade] (tf) at (4.5, 1.1) {TweetFacade};
+
+% Repositorios (derecha arriba)
+\node[repo] (ar) at (9, 2.8)  {Android\\Repository};
+\node[repo] (cr) at (9, 1.1)  {Comentario\\Repository};
+\node[repo] (rr) at (9,-0.6)  {Reaccion\\Repository};
+
+% Modelos (derecha abajo)
+\node[model] (at) at (4.5,-1.4) {android\_tweet};
+\node[model] (cm) at (1.5,-2.8) {Comentario};
+\node[model] (rm) at (7.0,-2.8) {Reaccion};
+
+% Flechas controladores -> facade
+\draw[arrow] (cc.east) -- (tf.west);
+\draw[arrow] (rc.east) -- (tf.west);
+
+% Flechas facade -> repositorios
+\draw[darrow] (tf.east) -- (ar.west);
+\draw[darrow] (tf.east) -- (cr.west);
+\draw[darrow] (tf.east) -- (rr.west);
+
+% Flechas facade -> modelos
+\draw[marrow] (tf.south) -- (at.north);
+\draw[marrow] (at.south west) -- (cm.north east);
+\draw[marrow] (at.south east) -- (rm.north west);
+
+% Etiqueta subsistema
+\begin{pgfonlayer}{background}
+  \node[draw=blue!30,fill=blue!4,rounded corners=8pt,
+        fit=(ar)(cr)(rr),inner sep=10pt,
+        label={[font=\footnotesize\color{blue!60}]above:Repositorios (subsistema)}] {};
+  \node[draw=orange!40,fill=orange!4,rounded corners=8pt,
+        fit=(at)(cm)(rm),inner sep=8pt,
+        label={[font=\footnotesize\color{orange!80}]below:Modelos / Entidades JPA}] {};
+\end{pgfonlayer}
+
 \end{tikzpicture}
 \end{center}
 
-%─────────────────────────────────────────────────────────────
-\subsection{Patron Repository}
-%─────────────────────────────────────────────────────────────
+\subsection{Beneficios obtenidos del patron Facade}
 
-\begin{patternbox}{Que es el patron Repository?}
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\textwidth}{>{\bfseries}l X}
+\rowcolor{darkbg}
+\multicolumn{1}{>{\color{white}\bfseries}l}{Beneficio} &
+\multicolumn{1}{>{\color{white}\bfseries}X}{Impacto en el proyecto} \\
+\rowcolor{infobg}
+Bajo acoplamiento & Los controladores no dependen de los repositorios directamente \\
+\rowcolor{white}
+Unico punto de cambio & Si cambia la logica de comentarios, solo se modifica \texttt{TweetFacade} \\
+\rowcolor{infobg}
+Codigo limpio & Cada controlador tiene menos de 30 lineas de codigo \\
+\rowcolor{white}
+Logica centralizada & El conteo de reacciones por tipo vive en un solo lugar \\
+\rowcolor{infobg}
+Facil de testear & Se puede hacer mock de \texttt{TweetFacade} sin levantar repositorios \\
+\end{tabularx}
+\caption{Beneficios del patron Facade en el proyecto}
+\end{table}
+
+%=============================================================
+\section{Patron Repository}
+%=============================================================
+
+\begin{patternbox}{?`Que es el patron Repository?}
 El Repository actua como una coleccion de objetos en memoria. En lugar
 de escribir SQL directamente en la logica de negocio, se crea una
 interfaz que define que operaciones se pueden hacer con cada entidad.
@@ -345,14 +605,7 @@ Spring Data JPA genera automaticamente la implementacion a partir
 del nombre de los metodos, sin necesidad de escribir SQL.
 \end{patternbox}
 
-\subsubsection{Por que se uso en este proyecto?}
-
-Separar el acceso a datos de la logica hace que el codigo sea mas limpio.
-Si se cambia la base de datos, solo hay que modificar el repositorio y no
-toda la aplicacion. Spring Data JPA genera el SQL automaticamente a partir
-del nombre del metodo, lo que reduce errores y codigo repetitivo.
-
-\subsubsection{Codigo implementado}
+\subsubsection{Repositorios implementados}
 
 \begin{filebox}{ComentarioRepository.java}
 \begin{lstlisting}[language=Java]
@@ -367,43 +620,111 @@ public interface ComentarioRepository
 \end{lstlisting}
 \end{filebox}
 
-\vspace{0.4em}
-
 \begin{filebox}{ReaccionRepository.java}
 \begin{lstlisting}[language=Java]
 @Repository
 public interface ReaccionRepository
         extends JpaRepository<Reaccion, Long> {
 
+    // SELECT * FROM reacciones WHERE tweet_id = ?
     List<Reaccion> findByTweetId(Long tweetId);
+
+    // SELECT COUNT(*) FROM reacciones WHERE tweet_id = ?
     long countByTweetId(Long tweetId);
 }
 \end{lstlisting}
 \end{filebox}
 
-%─────────────────────────────────────────────────────────────
-\subsection{Patron MVC (Model -- View -- Controller)}
-%─────────────────────────────────────────────────────────────
+\begin{filebox}{AndroidRepository.java}
+\begin{lstlisting}[language=Java]
+@Repository
+public interface AndroidRepository
+        extends JpaRepository<android_tweet, Long> {
 
-\begin{patternbox}{Que es el patron MVC?}
-MVC divide la aplicacion en tres capas: el \textbf{Modelo} maneja
-los datos, la \textbf{Vista} muestra la interfaz al usuario, y el
-\textbf{Controlador} recibe las peticiones y coordina entre los otros
-dos. Esto permite cambiar la interfaz sin tocar la logica del negocio.
-\end{patternbox}
+    // SELECT * FROM android_versions WHERE user_id = ?
+    List<android_tweet> findByUserId(Long userId);
+}
+\end{lstlisting}
+\end{filebox}
 
-\subsubsection{Como se aplico en el proyecto?}
+\begin{filebox}{UserRepository.java}
+\begin{lstlisting}[language=Java]
+@Repository
+public interface UserRepository
+        extends JpaRepository<User, Long> {
 
-MVC se aplica en dos niveles. En el backend, Spring Boot usa
-\texttt{@RestController} como controladores y las clases
-\texttt{@Entity} como modelos. En el frontend, Flutter actua como la
-vista que consume la API y muestra los datos al usuario.
+    // SELECT * FROM users WHERE correo = ?
+    Optional<User> findByCorreo(String correo);
 
-\subsubsection{Codigo implementado}
+    // SELECT COUNT(*) > 0 FROM users WHERE correo = ?
+    boolean existsByCorreo(String correo);
+}
+\end{lstlisting}
+\end{filebox}
 
-\textbf{Modelo} --- entidad JPA que mapea la tabla de reacciones:
+%=============================================================
+\section{Modelos / Entidades JPA}
+%=============================================================
 
-\begin{filebox}{Reaccion.java --- Modelo}
+Los modelos son clases Java anotadas con \texttt{@Entity} que Hibernate
+mapea automaticamente a tablas de PostgreSQL.
+
+\begin{filebox}{android\_tweet.java --- Entidad principal}
+\begin{lstlisting}[language=Java]
+@Entity
+@Table(name = "android_versions")
+public class android_tweet {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotBlank @Size(max = 100)
+    private String nombre;
+
+    @NotBlank
+    private String fecha;
+
+    @NotBlank @Size(max = 500)
+    private String descripcion;
+
+    @Column(length = 1000)
+    private String caracteristicas;
+
+    @Column(name = "url_photo")
+    private String urlPhoto;
+
+    // Relacion: muchas versiones pertenecen a un usuario
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private User user;
+}
+\end{lstlisting}
+\end{filebox}
+
+\begin{filebox}{Comentario.java}
+\begin{lstlisting}[language=Java]
+@Entity
+@Table(name = "comentarios")
+public class Comentario {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String texto;
+
+    // Relacion: muchos comentarios pertenecen a un tweet
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tweet_id")
+    @JsonIgnore  // Evita referencia circular en la serializacion JSON
+    private android_tweet tweet;
+}
+\end{lstlisting}
+\end{filebox}
+
+\begin{filebox}{Reaccion.java}
 \begin{lstlisting}[language=Java]
 @Entity
 @Table(name = "reacciones")
@@ -413,38 +734,65 @@ public class Reaccion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String tipo;
+    private String tipo; // "like", "love", "haha", "wow", "sad"
 
+    // Relacion: muchas reacciones pertenecen a un tweet
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tweet_id")
+    @JsonIgnore
     private android_tweet tweet;
 }
 \end{lstlisting}
 \end{filebox}
 
-\vspace{0.5em}
-\textbf{Vista} --- pantalla de detalle en Flutter:
+\begin{filebox}{User.java}
+\begin{lstlisting}[language=Java]
+@Entity
+@Table(name = "users")
+public class User {
 
-\begin{filebox}{detail\_screen.dart --- Vista (Flutter)}
-\begin{lstlisting}[language=Java,
-  literate={_}{\_}1 {!}{!}1
-]
-// La vista solo llama al servicio y actualiza la UI
-Future<void> _reaccionar(String tipo) async {
-    await AndroidService.agregarReaccion(
-        widget.version.id, tipo);
-    await _cargarReacciones();
-}
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-Future<void> _enviarComentario() async {
-    final texto = comentarioCtrl.text.trim();
-    await AndroidService.agregarComentario(
-        widget.version.id, texto);
-    comentarioCtrl.clear();
-    await _cargarComentarios();
+    @NotBlank
+    private String nombre;
+
+    @NotBlank
+    @Column(unique = true)
+    private String correo;
+
+    @NotBlank
+    private String contrasena;
+
+    // Un usuario puede tener muchas versiones de Android
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<android_tweet> versiones = new ArrayList<>();
 }
 \end{lstlisting}
 \end{filebox}
+
+%=============================================================
+\section{Patron MVC}
+%=============================================================
+
+\begin{patternbox}{?`Que es el patron MVC?}
+MVC divide la aplicacion en tres capas: el \textbf{Modelo} maneja
+los datos, la \textbf{Vista} muestra la interfaz al usuario, y el
+\textbf{Controlador} recibe las peticiones y coordina entre los otros
+dos. Esto permite cambiar la interfaz sin tocar la logica del negocio.
+\end{patternbox}
+
+En este proyecto MVC se aplica en dos niveles simultaneos:
+
+\begin{itemize}
+  \item \textbf{Backend (Spring Boot):} las entidades JPA son el Modelo,
+        los \texttt{@RestController} son los Controladores, y el JSON
+        que retorna la API es la representacion de la Vista.
+  \item \textbf{Frontend (Flutter):} los widgets de Flutter son la Vista
+        que consume la API y muestra los datos al usuario.
+\end{itemize}
 
 %=============================================================
 \section{Endpoints de la API REST}
@@ -461,26 +809,26 @@ Future<void> _enviarComentario() async {
 \multicolumn{1}{>{\color{white}\bfseries\rmfamily\small}X}{Descripcion} \\
 \rowcolor{androidgreen!15}
 \multicolumn{3}{l}{\textbf{\small Versiones de Android}} \\
-GET    & /api/android-versions & Obtener versiones de un usuario \\
+GET    & /api/android-versions?userId=\{id\} & Obtener versiones de un usuario \\
 \rowcolor{lightgray}
-POST   & /api/android-versions & Crear nueva version \\
-DELETE & /api/android-versions/\{id\} & Eliminar version por ID \\
+POST   & /api/android-versions?userId=\{id\} & Crear nueva version \\
+DELETE & /api/android-versions/\{id\}        & Eliminar version por ID \\
 \rowcolor{androidgreen!15}
 \multicolumn{3}{l}{\textbf{\small Usuarios}} \\
 \rowcolor{lightgray}
 POST   & /api/users            & Registrar nuevo usuario \\
 POST   & /api/users/login      & Iniciar sesion \\
-\rowcolor{lightgray}
 PUT    & /api/users/\{id\}     & Actualizar datos del usuario \\
+\rowcolor{lightgray}
 DELETE & /api/users/\{id\}     & Eliminar cuenta \\
 \rowcolor{androidgreen!15}
-\multicolumn{3}{l}{\textbf{\small Reacciones y Comentarios}} \\
+\multicolumn{3}{l}{\textbf{\small Reacciones y Comentarios (via Facade)}} \\
 \rowcolor{lightgray}
-POST   & /api/tweets/\{id\}/reacciones & Agregar reaccion \\
-GET    & /api/tweets/\{id\}/reacciones/conteo & Conteo por tipo \\
+POST   & /api/tweets/\{id\}/reacciones         & Agregar reaccion \\
+GET    & /api/tweets/\{id\}/reacciones/conteo  & Conteo por tipo \\
 \rowcolor{lightgray}
-POST   & /api/tweets/\{id\}/comentarios & Agregar comentario \\
-GET    & /api/tweets/\{id\}/comentarios & Lista de comentarios \\
+POST   & /api/tweets/\{id\}/comentarios        & Agregar comentario \\
+GET    & /api/tweets/\{id\}/comentarios        & Lista de comentarios \\
 \end{tabularx}
 \caption{Endpoints completos de la API REST}
 \end{table}
@@ -500,12 +848,12 @@ GET    & /api/tweets/\{id\}/comentarios & Lista de comentarios \\
   {Flutter (Vista)\\
    \footnotesize\normalfont Web --- Linux Desktop --- APK Android};
 \node[layer=blue] (spring) at (0,2)
-  {Spring Boot (Controlador + Facade)\\
+  {Spring Boot (Controladores + TweetFacade)\\
    \footnotesize\normalfont API REST en puerto 8080};
 \node[layer=orange] (db) at (0,0)
-  {PostgreSQL (Modelo)\\
-   \footnotesize\normalfont Tablas: users, android\_tweet, reacciones, comentarios};
-\draw[arrow] (flutter) -- node[right,font=\footnotesize]{HTTP / REST} (spring);
+  {PostgreSQL / Aiven (Modelo)\\
+   \footnotesize\normalfont Tablas: users, android\_versions, reacciones, comentarios};
+\draw[arrow] (flutter) -- node[right,font=\footnotesize]{HTTPS / REST $\rightarrow$ android-versions.onrender.com} (spring);
 \draw[arrow] (spring) -- node[right,font=\footnotesize]{JPA / Hibernate} (db);
 \end{tikzpicture}
 \end{center}
@@ -513,9 +861,8 @@ GET    & /api/tweets/\{id\}/comentarios & Lista de comentarios \\
 \vspace{0.5em}
 
 El backend se empaqueta con Maven en un JAR y se contenedoriza con Docker.
-La imagen se sube a Docker Hub y Render la descarga para el despliegue.
 Las variables de entorno \texttt{DATABASE\_URL}, \texttt{DB\_USER} y
-\texttt{DB\_PASSWORD} configuran la conexion a PostgreSQL en Aiven.
+\texttt{DB\_PASSWORD} configuran la conexion a Aiven desde Render.
 
 \begin{tcolorbox}[
   enhanced, colback=darkbg, colframe=androidgreen,
@@ -523,33 +870,31 @@ Las variables de entorno \texttt{DATABASE\_URL}, \texttt{DB\_USER} y
   left=10pt, right=10pt, top=8pt, bottom=8pt,
 ]
 \color{androidgreen}\ttfamily\small
-\$ mvn spring-boot:run -Dspring-boot.run.profiles=local\\[2pt]
-\$ flutter run -d chrome
+\# Desarrollo local\\
+\$ mvn spring-boot:run -Dspring-boot.run.profiles=local\\[4pt]
+\# Produccion (Render lo ejecuta automaticamente via Docker)\\
+\$ flutter build web --release \quad\# frontend web\\
+\$ flutter build apk --release \quad\# APK Android
 \end{tcolorbox}
 
 %=============================================================
 \section{Conclusion}
 %=============================================================
 
-El uso de los patrones \textbf{Facade}, \textbf{Repository} y \textbf{MVC}
-permitio organizar el proyecto de una forma clara donde cada clase tiene
-una sola responsabilidad.
+El patron \textbf{Facade} fue el aporte estructural mas importante del
+proyecto. Al encapsular toda la coordinacion entre \texttt{AndroidRepository},
+\texttt{ComentarioRepository} y \texttt{ReaccionRepository} dentro de
+\texttt{TweetFacade}, se logro que los controladores REST quedaran con
+una sola dependencia y menos de 30 lineas de codigo cada uno. Eso hace
+el sistema mas facil de mantener: si la logica de conteo de reacciones
+cambia, solo se modifica la fachada.
 
-La \textbf{fachada} fue el patron mas importante porque evito que los
-controladores tuvieran que conocer los detalles de como se guarda un
-comentario o como se cuentan las reacciones. Todo queda encapsulado en
-\texttt{TweetFacade} y los controladores simplemente delegan.
+Los \textbf{repositorios} eliminaron la necesidad de escribir SQL, ya que
+Spring Data JPA genera las consultas automaticamente a partir del nombre
+de los metodos como \texttt{findByTweetId} o \texttt{existsByCorreo}.
 
-Los \textbf{repositorios} hicieron que el acceso a datos fuera muy limpio.
-Spring Data JPA genera el SQL automaticamente, lo que reduce errores y
-codigo repetitivo.
-
-El patron \textbf{MVC} permitio desarrollar el backend y el frontend de
-forma independiente. Flutter no sabe nada de la base de datos: solo consume
-la API REST y muestra los datos al usuario.
-
-\vspace{2em}
-\begin{center}
-\end{center}
+El patron \textbf{MVC} permitio desarrollar el backend (Spring Boot) y
+el frontend (Flutter) de forma completamente independiente, comunicandose
+unicamente a traves de la API REST desplegada en Render.
 
 \end{document}
